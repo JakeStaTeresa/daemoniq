@@ -67,6 +67,8 @@ namespace Daemoniq.Core.Cli
                     LongArgument = "help",
                     ShortArgument = "h",
                     IsFlag =  true,
+                    AcceptedValues = new []{ "true", "false"},
+                    DefaultValue = "true",
                     Description = "Show this help text.",
                 });
         }        
