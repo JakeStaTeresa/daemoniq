@@ -33,9 +33,10 @@ namespace Daemoniq.Core.Cli
         {
             get
             {
-                return Arguments.Count == 0 ||
+                return (Arguments.Count == 0 ||
                        Arguments.ContainsKey("help") ||
-                       Arguments.ContainsKey("h");                
+                       Arguments.ContainsKey("h")) &&
+                       !HasErrors;                
             }
         }
 
