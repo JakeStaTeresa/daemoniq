@@ -244,7 +244,9 @@ namespace Daemoniq.Framework
                         if (parseResult.Arguments.ContainsKey("username") &&
                             parseResult.Arguments.ContainsKey("password"))
                         {
-                            configuration.AccountInfo = new AccountInfo(AccountType.NetworkService);
+                            configuration.AccountInfo = new AccountInfo(
+                                parseResult.Arguments["username"],
+                                parseResult.Arguments["password"]);
                         }
                         break;
                 }

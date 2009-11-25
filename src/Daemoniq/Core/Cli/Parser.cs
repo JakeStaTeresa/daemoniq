@@ -85,7 +85,7 @@ namespace Daemoniq.Core.Cli
                 if(string.IsNullOrEmpty(usageText))
                 {
                     StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.AppendLine("usage: ");
+                    stringBuilder.AppendLine("Usage: ");
                     stringBuilder.AppendFormat("   {0}", programName);
                     if(arguments.Count > 0)
                     {
@@ -110,7 +110,7 @@ namespace Daemoniq.Core.Cli
                     StringBuilder stringBuilder = new StringBuilder();
                     if (arguments.Count > 0)
                     {
-                        stringBuilder.AppendLine("available arguments are:");
+                        stringBuilder.AppendLine("Available arguments are:");
                         int maxLongArgumentLength = 0;
                         foreach (var argumentInfo in Arguments)
                         {
@@ -166,11 +166,13 @@ namespace Daemoniq.Core.Cli
 
             checkRequiredArguments(parseResult);
 
+            checkArgumentValues(parseResult, argumentMap);            
+
             performContextActions(parseResult);
 
             return parseResult;
-        }
-        
+        }      
+
         public void ShowHelp()
         {
             Console.WriteLine(UsageText);
@@ -291,18 +293,7 @@ namespace Daemoniq.Core.Cli
                 }
 
                 argumentInfo = argumentMap[argumentName];
-                if (argumentInfo.AcceptedValues != null &&
-                    argumentInfo.AcceptedValues.Length > 0)
-                {
-                    if (Array.FindAll(argumentInfo.AcceptedValues, s => s == argumentValue).Length == 0)
-                    {
-                        parseResult.Errors.Add(string.Format("Value '{0}' for argument '{1}' is not in list of accepted values.",
-                                                      argumentValue, argumentName));
-                        continue;
-                    }
-                }
-
-                parseResult.Arguments.Add(argumentInfo.LongArgument, argumentValue);
+                parseResult.Arguments.Add(argumentInfo.LongArgument, argumentValue);                                
             }
 
             return parseResult;
@@ -324,6 +315,28 @@ namespace Daemoniq.Core.Cli
                 }
             }
             parseResult.Errors.AddRange(parseErrors);
+        }
+
+        private void checkArgumentValues(ParseResult parseResult,
+            IDictionary<string, ArgumentInfo> argumentMap)
+        {
+            foreach (var argument in parseResult.Arguments)
+            {
+                var argumentName = argument.Key;
+                var argumentValue = argument.Value;                
+
+                var argumentInfo = argumentMap[argumentName];
+                if (argumentInfo.AcceptedValues != null &&
+                    argumentInfo.AcceptedValues.Length > 0)
+                {
+                    if (Array.FindAll(argumentInfo.AcceptedValues, s => s == argumentValue).Length == 0)
+                    {
+                        parseResult.Errors.Add(string.Format("Value '{0}' for argument '{1}' is not in the list of accepted values. Accepted values are '{2}'.",
+                                                      argumentValue, argumentName, string.Join("', '", argumentInfo.AcceptedValues))); 
+                        continue;
+                    }
+                }
+            }
         }
 
         private void performContextActions(ParseResult parseResult)
