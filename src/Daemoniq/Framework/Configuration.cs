@@ -20,6 +20,7 @@ namespace Daemoniq.Framework
     public class Configuration:IConfiguration
     {
         private readonly List<string> servicesDependedOn;
+        private readonly ServiceRecoveryOptions recoveryOptions;
 
         public Configuration()
         {            
@@ -27,6 +28,7 @@ namespace Daemoniq.Framework
             Action = ConfigurationAction.Run;
             AccountInfo = new AccountInfo(AccountType.User);
             servicesDependedOn = new List<string>();
+            recoveryOptions = new ServiceRecoveryOptions();
         }
 
         #region IConfiguration Members
@@ -38,7 +40,7 @@ namespace Daemoniq.Framework
         public StartMode StartMode { get; set; }
         public AccountInfo AccountInfo { get; set; }
         public ConfigurationAction Action { get; set; }
-        public ServiceRecoveryOptions RecoveryOptions { get; set; }        
+        public ServiceRecoveryOptions RecoveryOptions { get { return recoveryOptions; } }        
         public string LogFile { get; set; }
         public bool? LogToConsole { get; set; }
         public bool? ShowCallStack { get; set; }

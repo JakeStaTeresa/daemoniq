@@ -26,7 +26,7 @@ namespace Daemoniq.Framework
         StartMode StartMode { get; set; }
         AccountInfo AccountInfo { get; set; }
         ConfigurationAction Action { get; set; }
-        ServiceRecoveryOptions RecoveryOptions { get; set; }
+        ServiceRecoveryOptions RecoveryOptions { get; }
         string LogFile { get; set; }
         bool? LogToConsole { get; set; }
         bool? ShowCallStack { get; set; }

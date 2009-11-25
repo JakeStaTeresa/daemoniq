@@ -71,8 +71,7 @@ namespace Daemoniq.Framework
             configuration.DisplayName = serviceInstance.DisplayName;
             configuration.Description = serviceInstance.Description;
             configuration.ServicesDependedOn.AddRange(serviceInstance.ServicesDependedOn);
-            configuration.RecoveryOptions = serviceInstance.RecoveryOptions;
-
+            
             Configurer.Configure(configuration);
             var command = CommandFactory.CreateInstance(configuration.Action);
             command.Execute(configuration, serviceInstance);
