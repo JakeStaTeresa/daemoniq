@@ -154,7 +154,7 @@ namespace Daemoniq.Framework
                 {
                     Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                               parseResult.Arguments["action"] == "uninstall",
-                    ValidArguments = new[] { "action", "credentials", "username", "password", "logToConsole", "showCallStack", "logFile" },
+                    ValidArguments = new[] { "action", "logToConsole", "showCallStack", "logFile" },
                     Action = parseResult => uninstallAction(parseResult, configuration)
                 });
             parser.Contexts.Add(
@@ -163,7 +163,7 @@ namespace Daemoniq.Framework
                     Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                               parseResult.Arguments["action"] == "debug",
                     ValidArguments = new[] { "action" },
-                    Action = parseResult => debugAction(parseResult, configuration)
+                    Action = parseResult => configuration.Action = ConfigurationAction.Console
                 });
             parser.Contexts.Add(
                 new ContextInfo
@@ -171,7 +171,7 @@ namespace Daemoniq.Framework
                     Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                               parseResult.Arguments["action"] == "run",
                     ValidArguments = new[] { "action" },
-                    Action = parseResult => runAction(parseResult, configuration)
+                    Action = parseResult => configuration.Action = ConfigurationAction.Run
                 });
             
             return parser;
@@ -180,9 +180,29 @@ namespace Daemoniq.Framework
         private void commonInstallerAction(ParseResult parseResult,
             IConfiguration configuration)
         {
+            if (parseResult.Arguments.ContainsKey("logToConsole"))
+            {
+                configuration.LogToConsole = parseResult.Arguments["logToConsole"] == "true";
+            }
+
+            if (parseResult.Arguments.ContainsKey("showCallStack"))
+            {
+                configuration.ShowCallStack = parseResult.Arguments["showCallStack"] == "true";
+            }
+            
+            if(parseResult.Arguments.ContainsKey("showCallStack"))
+            {
+                configuration.LogFile = parseResult.Arguments["logFile"];
+            }
+        }
+
+        private void installAction(ParseResult parseResult, 
+            IConfiguration configuration)
+        {
+            configuration.Action = ConfigurationAction.Install;
             bool credentialsExists = parseResult.Arguments.ContainsKey("credentials");
             if (!credentialsExists ||
-                (parseResult.Arguments["credentials"]!="user"))
+                (parseResult.Arguments["credentials"] != "user"))
             {
                 if (parseResult.Arguments.ContainsKey("username"))
                 {
@@ -192,11 +212,11 @@ namespace Daemoniq.Framework
                 if (parseResult.Arguments.ContainsKey("password"))
                 {
                     parseResult.Errors.Add(
-                        string.Format("Argument '{0}' is not valid in this context.", "username"));
-                }              
+                        string.Format("Argument '{0}' is not valid in this context.", "password"));
+                }
             }
 
-            if(credentialsExists)
+            if (credentialsExists)
             {
                 string credentials = parseResult.Arguments["credentials"];
                 switch (credentials)
@@ -229,12 +249,6 @@ namespace Daemoniq.Framework
                         break;
                 }
             }
-        }
-
-        private void installAction(ParseResult parseResult, 
-            IConfiguration configuration)
-        {
-            configuration.Action = ConfigurationAction.Install;
             commonInstallerAction(parseResult, configuration);
         }
 
@@ -243,18 +257,6 @@ namespace Daemoniq.Framework
         {
             configuration.Action = ConfigurationAction.Uninstall;
             commonInstallerAction(parseResult, configuration);
-        }
-
-        private void runAction(ParseResult parseResult,
-            IConfiguration configuration)
-        {
-            configuration.Action = ConfigurationAction.Run;
-        }
-
-        private void debugAction(ParseResult parseResult,
-            IConfiguration configuration)
-        {
-            configuration.Action = ConfigurationAction.Console;
         }
 
         private  bool isRunningAsService()
