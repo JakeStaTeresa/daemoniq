@@ -24,7 +24,6 @@ namespace Daemoniq.Framework
         string DisplayName { get; }
         string Description { get; }
         IEnumerable<string> ServicesDependedOn { get; }
-        ServiceRecoveryOptions RecoveryOptions { get; }
         
         bool CanHandleCustomCommand { get; }        
         bool CanHandlePowerEvent { get; }

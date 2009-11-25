@@ -29,7 +29,6 @@ namespace Daemoniq.Framework
         public abstract string ServiceName { get; }
         public abstract string DisplayName { get; }
         public abstract string Description { get; }
-        public ServiceRecoveryOptions RecoveryOptions { get { return recoveryOptions; } }
         public virtual IEnumerable<string> ServicesDependedOn { get{ yield break; } }        
         
         public virtual bool CanHandleCustomCommand

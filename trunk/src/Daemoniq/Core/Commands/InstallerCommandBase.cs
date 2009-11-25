@@ -45,7 +45,7 @@ namespace Daemoniq.Core.Commands
                     LogHelper.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
                     ServiceControlHelper.SetServiceRecoveryOptions(
                         configuration.ServiceName,
-                        serviceInstance.RecoveryOptions);
+                        configuration.RecoveryOptions);
                     
                 }
                 catch (Exception e)
