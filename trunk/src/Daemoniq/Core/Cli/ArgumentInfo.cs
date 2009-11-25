@@ -56,7 +56,9 @@ namespace Daemoniq.Core.Cli
                 LongArgument);
             if (!string.IsNullOrEmpty(ShortArgument))
             {
-                stringBuilder.AppendFormat("|{0}", ShortArgument);
+                stringBuilder.AppendFormat("|{0}{1}",
+                    Configuration.ArgumentPrefix,
+                    ShortArgument);
             }
 
             if (!IsFlag)
