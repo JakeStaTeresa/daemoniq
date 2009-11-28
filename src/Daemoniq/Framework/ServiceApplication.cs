@@ -110,7 +110,8 @@ namespace Daemoniq.Framework
                     {
                         LongArgument = "password",
                         ShortArgument = "p",
-                        Description = "The password of the credentials to use to perform the action. ",                        
+                        Description = "The password of the credentials to use to perform the action. ",
+                        Type = ArgumentType.Password
                     });
             parser.Arguments.Add(
                 new ArgumentInfo
@@ -118,7 +119,7 @@ namespace Daemoniq.Framework
                     LongArgument = "logToConsole",
                     ShortArgument = "l",
                     Description = "Log the output of the install/uninstall operation to the console. ",
-                    IsFlag = true,
+                    Type = ArgumentType.Flag,
                     AcceptedValues = new []{"true", "false"},
                     DefaultValue = "true"
                 });
@@ -128,7 +129,7 @@ namespace Daemoniq.Framework
                     LongArgument = "showCallStack",
                     ShortArgument = "s",
                     Description = "if an exception occurs at any point during installation, the call stack will be printed to the log. ",
-                    IsFlag = true,
+                    Type = ArgumentType.Flag,
                     AcceptedValues = new[] { "true", "false" },
                     DefaultValue = "true"
                 });

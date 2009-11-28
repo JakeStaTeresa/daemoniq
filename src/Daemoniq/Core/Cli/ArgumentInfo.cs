@@ -25,7 +25,7 @@ namespace Daemoniq.Core.Cli
         public string LongArgument { get; set; }
         public string Description { get; set; } 
         public bool Required { get; set; }
-        public bool IsFlag { get; set; }
+        public ArgumentType Type { get; set; }
         public string DefaultValue { get; set; }
         public string[] AcceptedValues { get; set; }
         
@@ -61,7 +61,7 @@ namespace Daemoniq.Core.Cli
                     ShortArgument);
             }
 
-            if (!IsFlag)
+            if (Type != ArgumentType.Flag)
             {
                 stringBuilder.AppendFormat("{0}{1}",
                     Configuration.KeyValueSeparator, "value");
