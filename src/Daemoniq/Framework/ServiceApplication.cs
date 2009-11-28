@@ -71,7 +71,9 @@ namespace Daemoniq.Framework
             configuration.DisplayName = serviceInstance.DisplayName;
             configuration.Description = serviceInstance.Description;
             configuration.ServicesDependedOn.AddRange(serviceInstance.ServicesDependedOn);
-            
+            configuration.AllowServiceToInteractWithDesktop = parseResult.Arguments.ContainsKey("interactive") &&
+                                                              parseResult.Arguments["interactive"] == "true";
+
             Configurer.Configure(configuration);
             var command = CommandFactory.CreateInstance(configuration.Action);
             command.Execute(configuration, serviceInstance);
@@ -116,6 +118,16 @@ namespace Daemoniq.Framework
             parser.Arguments.Add(
                 new ArgumentInfo
                 {
+                    LongArgument = "interactive",
+                    ShortArgument = "i",
+                    Description = "Enables the 'Allow the service to interact with desktop' option in the services.msc applet. This is only valid when credentials is set to 'localSystem'",
+                    Type = ArgumentType.Flag,
+                    AcceptedValues = new[] { "true", "false" },
+                    DefaultValue = "true"
+                });
+            parser.Arguments.Add(
+                new ArgumentInfo
+                {
                     LongArgument = "logToConsole",
                     ShortArgument = "l",
                     Description = "Log the output of the install/uninstall operation to the console. ",
@@ -146,7 +158,7 @@ namespace Daemoniq.Framework
                 {
                         Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                                   parseResult.Arguments["action"] == "install",
-                        ValidArguments = new[] { "action", "credentials", "username", "password", "logToConsole", "showCallStack", "logFile" },
+                        ValidArguments = new[] { "action", "credentials", "username", "password", "interactive", "logToConsole", "showCallStack", "logFile" },
                         Action = parseResult => installAction(parseResult, configuration)
                 });
             parser.Contexts.Add(
@@ -201,19 +213,12 @@ namespace Daemoniq.Framework
         {
             configuration.Action = ConfigurationAction.Install;
             bool credentialsExists = parseResult.Arguments.ContainsKey("credentials");
-            if (!credentialsExists ||
-                (parseResult.Arguments["credentials"] != "user"))
+            if (!credentialsExists)
             {
-                if (parseResult.Arguments.ContainsKey("username"))
-                {
-                    parseResult.Errors.Add(
-                        string.Format("Argument '{0}' is not valid in this context.", "username"));
-                }
-                if (parseResult.Arguments.ContainsKey("password"))
-                {
-                    parseResult.Errors.Add(
-                        string.Format("Argument '{0}' is not valid in this context.", "password"));
-                }
+                // all other arguments are invalid when 
+                // credentials does not exist
+                validateInstallArguments(parseResult,
+                    new [] { "action" });
             }
 
             if (credentialsExists)
@@ -222,15 +227,23 @@ namespace Daemoniq.Framework
                 switch (credentials)
                 {
                     case "localSystem":
-                        configuration.AccountInfo = new AccountInfo(AccountType.LocalSystem);
+                        validateInstallArguments(parseResult,
+                            new [] { "action","credentials", "interactive" });  
+                        configuration.AccountInfo = new AccountInfo(AccountType.LocalSystem);                        
                         break;
                     case "localService":
+                        validateInstallArguments(parseResult,
+                            new[] { "action", "credentials" });
                         configuration.AccountInfo = new AccountInfo(AccountType.LocalService);
                         break;
                     case "networkService":
+                        validateInstallArguments(parseResult,
+                            new[] { "action", "credentials" });
                         configuration.AccountInfo = new AccountInfo(AccountType.NetworkService);
                         break;
                     case "user":
+                        validateInstallArguments(parseResult,
+                            new[] { "action", "credentials", "username", "password" });
                         if (!parseResult.Arguments.ContainsKey("username"))
                         {
                             parseResult.Errors.Add(
@@ -252,6 +265,21 @@ namespace Daemoniq.Framework
                 }
             }
             commonInstallerAction(parseResult, configuration);
+        }
+
+        private void validateInstallArguments(ParseResult parseResult,
+            string[] validArguments)
+        {
+            foreach (var argumentName in parseResult.Arguments.Keys)
+            {
+                string argument = argumentName;
+                if (Array.FindAll(validArguments, s => s == argument).Length == 0)
+                {
+                    parseResult.Errors.Add(string.Format("Argument '{0}' is not valid in this context.",
+                                                  argument));
+                    continue;
+                }
+            }
         }
 
         private void uninstallAction(ParseResult parseResult,

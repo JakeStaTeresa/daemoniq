@@ -27,6 +27,7 @@ namespace Daemoniq.Framework
         AccountInfo AccountInfo { get; set; }
         ConfigurationAction Action { get; set; }
         ServiceRecoveryOptions RecoveryOptions { get; }
+        bool AllowServiceToInteractWithDesktop { get; set; }
         string LogFile { get; set; }
         bool? LogToConsole { get; set; }
         bool? ShowCallStack { get; set; }

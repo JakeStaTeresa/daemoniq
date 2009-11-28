@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.ServiceProcess;
 using Daemoniq.Framework;
+using Microsoft.Win32;
 
 namespace Daemoniq.Core
 {
@@ -374,6 +375,33 @@ namespace Daemoniq.Core
             bool returnValue = GetInstalledServices().Contains(serviceName);
             LogHelper.LeaveFunction();
             return returnValue;
+        }
+
+        public static void AllowServiceToInteractWithDesktop(string serviceName)
+        {
+            LogHelper.EnterFunction(serviceName);
+            RegistryKey registryKey = null;
+            try
+            {
+                registryKey = Registry.LocalMachine.OpenSubKey(
+                    string.Format(@"SYSTEM\CurrentControlSet\Services\{0}", serviceName), true);
+                
+                if (registryKey != null)
+                {
+                    if (registryKey.GetValue("Type") != null)
+                    {
+                        registryKey.SetValue("Type", ((int)registryKey.GetValue("Type") | 256));
+                    }
+                }
+            }
+            finally
+            {
+                if(registryKey != null)
+                {
+                    registryKey.Close();
+                }
+            }
+            LogHelper.LeaveFunction();
         }
 
         public static List<string> GetInstalledServices()

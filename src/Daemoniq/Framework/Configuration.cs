@@ -40,7 +40,8 @@ namespace Daemoniq.Framework
         public StartMode StartMode { get; set; }
         public AccountInfo AccountInfo { get; set; }
         public ConfigurationAction Action { get; set; }
-        public ServiceRecoveryOptions RecoveryOptions { get { return recoveryOptions; } }        
+        public ServiceRecoveryOptions RecoveryOptions { get { return recoveryOptions; } }
+        public bool AllowServiceToInteractWithDesktop { get; set; }       
         public string LogFile { get; set; }
         public bool? LogToConsole { get; set; }
         public bool? ShowCallStack { get; set; }

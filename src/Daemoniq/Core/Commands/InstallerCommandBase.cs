@@ -46,6 +46,10 @@ namespace Daemoniq.Core.Commands
                     ServiceControlHelper.SetServiceRecoveryOptions(
                         configuration.ServiceName,
                         configuration.RecoveryOptions);
+                    if(configuration.AllowServiceToInteractWithDesktop)
+                    {
+                        ServiceControlHelper.AllowServiceToInteractWithDesktop(configuration.ServiceName);
+                    }
                     
                 }
                 catch (Exception e)
