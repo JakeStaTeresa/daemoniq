@@ -24,8 +24,9 @@ namespace Daemoniq.Core.Commands
         public override void Execute(IConfiguration configuration,
             IServiceInstance serviceInstance)
         {
-            LogHelper.EnterFunction(configuration);
+            LogHelper.EnterFunction(configuration, serviceInstance);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
+            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
 
             if (!ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
             {

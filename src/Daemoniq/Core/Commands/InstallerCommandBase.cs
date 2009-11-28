@@ -32,7 +32,8 @@ namespace Daemoniq.Core.Commands
 
             if (ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
             {                         
-                LogHelper.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);                
+                LogHelper.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);
+                Console.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);
             }
             else
             {
@@ -43,6 +44,8 @@ namespace Daemoniq.Core.Commands
                     
                     transactedInstaller.Install(new Hashtable());
                     LogHelper.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
+                    Console.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
+
                     ServiceControlHelper.SetServiceRecoveryOptions(
                         configuration.ServiceName,
                         configuration.RecoveryOptions);
@@ -69,6 +72,7 @@ namespace Daemoniq.Core.Commands
             if (!ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
             {
                 LogHelper.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
+                Console.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
             }
             else
             {
@@ -78,6 +82,7 @@ namespace Daemoniq.Core.Commands
                     var transactedInstaller = createTransactedInstaller(configuration, serviceInstance);
                     transactedInstaller.Uninstall(null);
                     LogHelper.WriteLine("Service '{0}' successfully uninstalled.", configuration.DisplayName);
+                    Console.WriteLine("Service '{0}' successfully uninstalled.", configuration.DisplayName);
                 }
                 catch (Exception e)
                 {
