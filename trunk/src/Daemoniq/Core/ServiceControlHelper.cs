@@ -388,9 +388,10 @@ namespace Daemoniq.Core
                 
                 if (registryKey != null)
                 {
-                    if (registryKey.GetValue("Type") != null)
+                    object value = registryKey.GetValue("Type");
+                    if ( value != null)
                     {
-                        registryKey.SetValue("Type", ((int)registryKey.GetValue("Type") | 256));
+                        registryKey.SetValue("Type", ((int)value | 256));
                     }
                 }
             }
