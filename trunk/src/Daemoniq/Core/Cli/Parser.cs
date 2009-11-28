@@ -66,7 +66,7 @@ namespace Daemoniq.Core.Cli
                 {
                     LongArgument = "help",
                     ShortArgument = "h",
-                    IsFlag =  true,
+                    Type =  ArgumentType.Flag,
                     AcceptedValues = new []{ "true", "false"},
                     DefaultValue = "true",
                     Description = "Show this help text.",
@@ -258,25 +258,79 @@ namespace Daemoniq.Core.Cli
                         continue;
                     }
 
-                    argumentInfo = argumentMap[argument];
-                    if (!argumentInfo.IsFlag)
+                    argumentInfo = argumentMap[argument];                    
+                    if (argumentInfo.Type == ArgumentType.Normal)
                     {
                         parseResult.Errors.Add(string.Format("Argument '{0}' must have the following key value separator '{1}'",
                                                       argument, configuration.KeyValueSeparator));
                         continue;
                     }
 
-                    if (string.IsNullOrEmpty(argumentInfo.DefaultValue))
+                    if(argumentInfo.Type == ArgumentType.Flag)
                     {
-                        parseResult.Errors.Add(string.Format("Flag argument '{0}' must have a default value.",
-                                                      argument));
-                        continue;
+                        if (string.IsNullOrEmpty(argumentInfo.DefaultValue))
+                        {
+                            parseResult.Errors.Add(string.Format("Flag argument '{0}' must have a default value.",
+                                                          argument));
+                            continue;
+                        }
+
+                        argument = string.Format("{0}{1}{2}",
+                                                 argument,
+                                                 configuration.KeyValueSeparator,
+                                                 argumentInfo.DefaultValue);    
                     }
 
-                    argument = string.Format("{0}{1}{2}",
-                                             argument,
-                                             configuration.KeyValueSeparator,
-                                             argumentInfo.DefaultValue);
+                    if (argumentInfo.Type == ArgumentType.Password)
+                    {
+                        Console.WriteLine("Please enter you password in the space provided:");
+                        Console.Write("  Password: ");                        
+                        string password = "";
+                        ConsoleKeyInfo info = default(ConsoleKeyInfo);
+                        do
+                        {
+                            info = Console.ReadKey(true);
+                            if (info.Key == ConsoleKey.Enter)
+                            {
+                                break;
+                            }
+                            
+                            if (info.Key != ConsoleKey.Backspace)
+                            {
+                                char passwordChar = info.KeyChar; 
+                                if(char.IsLetter(passwordChar) ||
+                                    char.IsNumber(passwordChar) ||
+                                    char.IsSymbol(passwordChar))
+                                {
+                                    password += info.KeyChar;
+                                    Console.Write("*");    
+                                }
+                                else
+                                {
+                                    Console.Write("x");
+                                    //Console.Beep();
+                                }
+                            }
+                            else if (info.Key == ConsoleKey.Backspace)
+                            {
+                                if (!string.IsNullOrEmpty(password))
+                                {
+                                    password = password.Substring(0, password.Length - 1);
+                                    Console.CursorLeft -= 1;
+                                    Console.Write(" ");
+                                    Console.CursorLeft -= 1;
+                                }
+                                else
+                                {
+                                    Console.Beep();
+                                }
+                            }
+                        } while (true);
+                        argument = string.Format("{0}{1}{2}",
+                                                 argument,
+                                                 configuration.KeyValueSeparator,
+                                                 password);  
+                    }
                 }
 
                 string[] kv = argument.Split(new[] { configuration.KeyValueSeparator },
