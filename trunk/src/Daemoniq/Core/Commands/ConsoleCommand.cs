@@ -25,8 +25,9 @@ namespace Daemoniq.Core.Commands
         public void Execute(IConfiguration configuration,
             IServiceInstance serviceInstance)
         {
-            LogHelper.EnterFunction(configuration);
+            LogHelper.EnterFunction(configuration, serviceInstance);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
+            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
             try
             {
                 Console.Write("Starting service process...");
