@@ -248,7 +248,7 @@ namespace Daemoniq.Core.Cli
                 }
 
                 argument = argument.Substring(1);
-                var argumentInfo = default(ArgumentInfo);
+                ArgumentInfo argumentInfo;
                 if (!argument.Contains(configuration.KeyValueSeparator))
                 {
                     if (!argumentMap.ContainsKey(argument))
@@ -283,53 +283,11 @@ namespace Daemoniq.Core.Cli
 
                     if (argumentInfo.Type == ArgumentType.Password)
                     {
-                        Console.WriteLine("Please enter you password in the space provided:");
-                        Console.Write("  Password: ");                        
-                        string password = "";
-                        ConsoleKeyInfo info = default(ConsoleKeyInfo);
-                        do
-                        {
-                            info = Console.ReadKey(true);
-                            if (info.Key == ConsoleKey.Enter)
-                            {
-                                break;
-                            }
-                            
-                            if (info.Key != ConsoleKey.Backspace)
-                            {
-                                char passwordChar = info.KeyChar; 
-                                if(char.IsLetter(passwordChar) ||
-                                    char.IsNumber(passwordChar) ||
-                                    char.IsSymbol(passwordChar))
-                                {
-                                    password += info.KeyChar;
-                                    Console.Write("*");    
-                                }
-                                else
-                                {
-                                    Console.Write("x");
-                                    //Console.Beep();
-                                }
-                            }
-                            else if (info.Key == ConsoleKey.Backspace)
-                            {
-                                if (!string.IsNullOrEmpty(password))
-                                {
-                                    password = password.Substring(0, password.Length - 1);
-                                    Console.CursorLeft -= 1;
-                                    Console.Write(" ");
-                                    Console.CursorLeft -= 1;
-                                }
-                                else
-                                {
-                                    Console.Beep();
-                                }
-                            }
-                        } while (true);
+                        string password = getPassword();
                         argument = string.Format("{0}{1}{2}",
                                                  argument,
                                                  configuration.KeyValueSeparator,
-                                                 password);  
+                                                 password);
                     }
                 }
 
@@ -351,6 +309,60 @@ namespace Daemoniq.Core.Cli
             }
 
             return parseResult;
+        }
+
+        private string getPassword()
+        {
+            Console.WriteLine("Please enter you password in the space provided:");
+            Console.Write("  Password: ");                        
+            string password = "";
+            ConsoleKeyInfo info;
+            do
+            {
+                info = Console.ReadKey(true);
+                if (info.Key == ConsoleKey.Enter)
+                {
+                    if(string.IsNullOrEmpty(password))
+                    {
+                        Console.Beep();
+                        continue;
+                    }
+
+                    break;
+                }
+                            
+                if (info.Key != ConsoleKey.Backspace)
+                {
+                    char passwordChar = info.KeyChar; 
+                    if(char.IsLetter(passwordChar) ||
+                       char.IsNumber(passwordChar) ||
+                       char.IsSymbol(passwordChar))
+                    {
+                        password += info.KeyChar;
+                        Console.Write("*");    
+                    }
+                    else
+                    {
+                        Console.Write("x");
+                        //Console.Beep();
+                    }
+                }
+                else if (info.Key == ConsoleKey.Backspace)
+                {
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        password = password.Substring(0, password.Length - 1);
+                        Console.CursorLeft -= 1;
+                        Console.Write(" ");
+                        Console.CursorLeft -= 1;
+                    }
+                    else
+                    {
+                        Console.Beep();
+                    }
+                }
+            } while (true);
+            return password;
         }
 
         private void checkRequiredArguments(ParseResult parseResult)
