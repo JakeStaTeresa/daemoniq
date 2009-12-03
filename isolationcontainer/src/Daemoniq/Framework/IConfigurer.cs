@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 namespace Daemoniq.Framework
-{
+{    
     public interface IConfigurer
     {        
-        void Configure(IConfiguration configuration);
+        IConfiguration Configure();
     }
 }

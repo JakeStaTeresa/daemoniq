@@ -13,35 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using System.Diagnostics;
 using System.Threading;
 using Daemoniq.Framework;
 
 namespace Daemoniq.Samples
 {
-    class DummyService:ServiceInstanceBase
+    public class DummyService:ServiceInstanceBase
     {
-        private readonly ManualResetEvent stopRequested = new ManualResetEvent(false);
-        private const string serviceName = "DummyService";
-        private const string displayName = "Dummy Service";
-        private const string description = "This service was created using Daemoniq Framework.";
-
-        public override string  ServiceName
-        {
-            get { return serviceName; }
-        }
-
-        public override string  DisplayName
-        {
-            get { return displayName; }
-        }
-
-        public override string  Description
-        {
-            get { return description; }
-        }
+        private readonly ManualResetEvent stopRequested = new ManualResetEvent(false);        
 
         public override void OnStart()
         {
+            Trace.WriteLine("Starting instance : " + GetHashCode());
             var t = new Thread(threadProc);
             t.Start();
         }

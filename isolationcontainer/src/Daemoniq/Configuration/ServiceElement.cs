@@ -14,17 +14,72 @@
  *  limitations under the License.
  */
 using System.Configuration;
+using Daemoniq.Framework;
 
 namespace Daemoniq.Configuration
 {
-    public class ServiceElement : 
-        ConfigurationElement
+    public class ServiceElement :
+       ConfigurationElement
     {
-        [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
-        public string Name
+        public ServiceElement()
         {
-            get { return (string)(base["name"]); }
-            set { base["name"] = value; }
+            StartMode = StartMode.Manual;
+        }
+
+        [ConfigurationProperty("id")]
+        public string Id
+        {
+            get { return (string)(base["id"]); }
+            set { base["id"] = value; }
+        }
+
+        [ConfigurationProperty("serviceName", IsRequired = true, IsKey = true)]
+        public string ServiceName
+        {
+            get { return (string)(base["serviceName"]); }
+            set { base["serviceName"] = value; }
+        }
+
+        [ConfigurationProperty("displayName")]
+        public string DisplayName
+        {
+            get { return (string)(base["displayName"]); }
+            set { base["displayName"] = value; }
+        }
+
+        [ConfigurationProperty("description")]
+        public string Description
+        {
+            get { return (string)(base["description"]); }
+            set { base["description"] = value; }
+        }
+
+        [ConfigurationProperty("interactive")]
+        public bool Interactive
+        {
+            get { return (bool)(base["interactive"]); }
+            set { base["interactive"] = value; }
+        }
+
+        [ConfigurationProperty("serviceStartMode")]
+        public StartMode StartMode
+        {
+            get { return (StartMode)(base["serviceStartMode"]); }
+            set { base["serviceStartMode"] = value; }
+        }
+
+        [ConfigurationProperty("recoveryOptions")]
+        public RecoveryOptionsElement RecoveryOptions
+        {
+            get { return (RecoveryOptionsElement)this["recoveryOptions"]; }
+            set { this["recoveryOptions"] = value; }
+        }
+
+        [ConfigurationProperty("servicesDependedOn",
+           IsDefaultCollection = true, IsRequired = false)]
+        public ServiceDependedOnElementCollection ServicesDependedOn
+        {
+            get { return (ServiceDependedOnElementCollection)this["servicesDependedOn"]; }
         }
     }
-}      
+}

@@ -19,13 +19,14 @@ namespace Daemoniq.Core.Commands
 {
     class InstallCommand:InstallerCommandBase
     {
-        public override void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public override void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
-            Install(configuration, serviceInstance);
+            LogHelper.EnterFunction(configuration, commandLineArguments);
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configurationSection");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            Install(configuration, commandLineArguments);
             LogHelper.LeaveFunction();
         }
     }

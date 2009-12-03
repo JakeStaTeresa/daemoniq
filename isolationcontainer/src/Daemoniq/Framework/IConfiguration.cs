@@ -19,17 +19,6 @@ namespace Daemoniq.Framework
 {
     public interface IConfiguration
     {
-        string ServiceName { get; set; }
-        string DisplayName { get; set; }
-        string Description { get; set; }
-        List<string> ServicesDependedOn { get; }
-        StartMode StartMode { get; set; }
-        AccountInfo AccountInfo { get; set; }
-        ConfigurationAction Action { get; set; }
-        ServiceRecoveryOptions RecoveryOptions { get; }
-        bool AllowServiceToInteractWithDesktop { get; set; }
-        string LogFile { get; set; }
-        bool? LogToConsole { get; set; }
-        bool? ShowCallStack { get; set; }
+        List<ServiceInfo> Services { get; }
     }
 }

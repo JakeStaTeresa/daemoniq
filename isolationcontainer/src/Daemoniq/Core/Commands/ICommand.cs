@@ -19,7 +19,8 @@ namespace Daemoniq.Core.Commands
 {
     interface ICommand
     {
-        void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance);
+        void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments);
     }
 }

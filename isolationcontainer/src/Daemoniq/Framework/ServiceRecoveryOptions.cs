@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using Daemoniq.Configuration;
 using Daemoniq.Core;
 
 namespace Daemoniq.Framework
@@ -96,6 +97,19 @@ namespace Daemoniq.Framework
                 result = (result*397) ^ (CommandToLaunchOnFailure != null ? CommandToLaunchOnFailure.GetHashCode() : 0);
                 return result;
             }
+        }
+
+        public static ServiceRecoveryOptions FromConfiguration(RecoveryOptionsElement recoveryOptionsElement)
+        {
+            var recoveryOptions = new ServiceRecoveryOptions();
+            recoveryOptions.FirstFailureAction = recoveryOptionsElement.FirstFailureAction;
+            recoveryOptions.SecondFailureAction = recoveryOptionsElement.SecondFailureAction;
+            recoveryOptions.SubsequentFailureActions = recoveryOptionsElement.SubsequentFailureActions;
+            recoveryOptions.DaysToResetFailAcount = recoveryOptionsElement.DaysToResetFailAcount;
+            recoveryOptions.CommandToLaunchOnFailure = recoveryOptionsElement.CommandToLaunchOnFailure;
+            recoveryOptions.MinutesToRestartService = recoveryOptionsElement.MinutesToRestartService;
+            recoveryOptions.RebootMessage = recoveryOptionsElement.RebootMessage;
+            return recoveryOptions;
         }
     }
 }

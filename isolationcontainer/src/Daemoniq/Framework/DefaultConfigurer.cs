@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using System.Collections.Generic;
 using System.Configuration;
 using Daemoniq.Configuration;
 
@@ -21,9 +20,9 @@ namespace Daemoniq.Framework
 {
     public class DefaultConfigurer :IConfigurer
     {
-        #region IConfigurer<TService> Members
+        #region IConfigurer Members
 
-        public void Configure(IConfiguration configuration)
+        public IConfiguration Configure()
         {            
             System.Configuration.Configuration exeConfiguration =
                 ConfigurationManager.OpenExeConfiguration(
@@ -40,39 +39,18 @@ namespace Daemoniq.Framework
                 }
             }
 
+            IConfiguration configuration = default(IConfiguration);                
             if (configurationSection != null)
             {
-                configuration.StartMode = configurationSection.ServiceStartMode;
-
-                if (configurationSection.ServicesDependedOn != null &&
-                    configurationSection.ServicesDependedOn.Count > 0)
+                configuration = new Configuration();
+                
+                foreach(var serviceElement in configurationSection.Services)
                 {
-                    List<string> servicesDependedOn = new List<string>();
-                    foreach (var service in configurationSection.ServicesDependedOn)
-                    {
-                        servicesDependedOn.Add(service.Name);
-                    }
-                    configuration.ServicesDependedOn.AddRange(servicesDependedOn);
-                }
-
-                if (configurationSection.RecoveryOptions != null)
-                {
-                    configuration.RecoveryOptions.FirstFailureAction =
-                        configurationSection.RecoveryOptions.FirstFailureAction;
-                    configuration.RecoveryOptions.SecondFailureAction =
-                        configurationSection.RecoveryOptions.SecondFailureAction;
-                    configuration.RecoveryOptions.SubsequentFailureActions =
-                        configurationSection.RecoveryOptions.SubsequentFailureActions;
-                    configuration.RecoveryOptions.DaysToResetFailAcount =
-                        configurationSection.RecoveryOptions.DaysToResetFailAcount;
-                    configuration.RecoveryOptions.MinutesToRestartService =
-                        configurationSection.RecoveryOptions.MinutesToRestartService;
-                    configuration.RecoveryOptions.RebootMessage =
-                        configurationSection.RecoveryOptions.RebootMessage;
-                    configuration.RecoveryOptions.CommandToLaunchOnFailure =
-                        configurationSection.RecoveryOptions.CommandToLaunchOnFailure;                    
+                    configuration.Services.Add(
+                        ServiceInfo.FromConfiguration(serviceElement));
                 }
             }
+            return configuration;
         }
 
         #endregion          

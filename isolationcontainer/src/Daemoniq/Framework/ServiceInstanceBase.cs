@@ -14,22 +14,13 @@
  *  limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.ServiceProcess;
 
 namespace Daemoniq.Framework
 {
     public abstract class ServiceInstanceBase : IServiceInstance
     {
-        private readonly ServiceRecoveryOptions recoveryOptions = 
-            new ServiceRecoveryOptions();
-
         #region IService Members
-
-        public abstract string ServiceName { get; }
-        public abstract string DisplayName { get; }
-        public abstract string Description { get; }
-        public virtual IEnumerable<string> ServicesDependedOn { get{ yield break; } }        
         
         public virtual bool CanHandleCustomCommand
         {
