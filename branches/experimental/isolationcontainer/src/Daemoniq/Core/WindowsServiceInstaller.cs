@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using System;
 using System.Configuration.Install;
 using System.ServiceProcess;
 using System.ComponentModel;
@@ -21,6 +22,7 @@ using Daemoniq.Framework;
 
 namespace Daemoniq.Core
 {
+    [Obsolete]
     [RunInstaller(true)]
     class WindowsServiceInstaller : Installer
     {

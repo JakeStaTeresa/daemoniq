@@ -14,31 +14,56 @@
  *  limitations under the License.
  */
 using System;
+using System.Collections.Generic;
 using Daemoniq.Framework;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
-    class ConsoleCommand:ICommand
+    class ConsoleCommand : CommandBase
     {
         #region ICommand Members
 
-        public void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public override void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
+            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+ 
+            var serviceLocator = ServiceLocator.Current;
+            if(serviceLocator == null)
+            {
+                throw new InvalidOperationException("An error occured while getting service locator.");
+            }
+
             try
             {
                 Console.Write("Starting service process...");
-
-                serviceInstance.OnStart();
+                
+                var servicesStarted = new List<IServiceInstance>();
+                foreach (var serviceElement in configuration.Services)
+                {
+                    var serviceInstance =
+                        serviceLocator.GetInstance<IServiceInstance>(serviceElement.Id);
+                    if(serviceInstance == null)
+                    {
+                        throw new InvalidOperationException(
+                            string.Format("An error located while resolving service instance '{0}'. ", serviceElement.ServiceName));
+                    }
+                    serviceInstance.OnStart();
+                    servicesStarted.Add(serviceInstance);
+                }
                 Console.WriteLine("Done.");
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey(true);
 
                 Console.WriteLine("Terminating service process...");
-                serviceInstance.OnStop();
+                foreach (var serviceInstance in servicesStarted)
+                {
+                    serviceInstance.OnStop();
+                }
                 Console.WriteLine("Done.");
             }
             catch (Exception e)

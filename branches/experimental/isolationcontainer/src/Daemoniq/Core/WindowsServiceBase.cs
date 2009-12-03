@@ -23,10 +23,12 @@ namespace Daemoniq.Core
     {
         private readonly IServiceInstance serviceInstance;
 
-        public WindowsServiceBase(IServiceInstance serviceInstance)
+        public WindowsServiceBase(string serviceName,
+            IServiceInstance serviceInstance)
         {
             ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
-
+            ServiceName = serviceName;
+            
             this.serviceInstance = serviceInstance;            
         }                        
 

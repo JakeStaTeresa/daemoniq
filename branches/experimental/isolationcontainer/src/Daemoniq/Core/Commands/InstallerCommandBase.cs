@@ -17,97 +17,177 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration.Install;
+using System.Reflection;
+using System.ServiceProcess;
 using Daemoniq.Framework;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
-    abstract class InstallerCommandBase : ICommand        
+    abstract class InstallerCommandBase : CommandBase        
     {
-        public void Install(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public void Install(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
+            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
 
-            if (ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
-            {                         
-                LogHelper.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);
-                Console.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);
-            }
-            else
+            var serviceLocator = ServiceLocator.Current;
+            if (serviceLocator == null)
             {
-                try
-                {
-                    LogHelper.WriteLine("Installing service '{0}'...", configuration.DisplayName);
-                    var transactedInstaller = createTransactedInstaller(configuration, serviceInstance);
-                    
-                    transactedInstaller.Install(new Hashtable());
-                    LogHelper.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
-                    Console.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
+                throw new InvalidOperationException("An error occured while getting service locator.");
+            }
 
+            var servicesToInstall = new List<ServiceInfo>();
+            foreach (var serviceInfo in configuration.Services)
+            {
+                var serviceInstance =
+                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.Id);
+                if (serviceInstance == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("An error located while resolving service instance '{0}'. ", serviceInfo.ServiceName));
+                }
+            
+                if (ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName))
+                {
+                    LogHelper.WriteLine("Service '{0}' is already installed.", serviceInfo.DisplayName);
+                    Console.WriteLine("Service '{0}' is already installed.", serviceInfo.DisplayName);
+                    continue;
+                }
+
+                servicesToInstall.Add(serviceInfo);
+            }
+
+            if (servicesToInstall.Count == 0)
+            {
+                LogHelper.WriteLine("There are  no serices to install.  Skipping install operation.");
+                Console.WriteLine("There are  no serices to install.  Skipping install operation.");
+                return;
+            }
+
+            try
+            {
+                string displayNamesToInstall =
+                    string.Join("','", 
+                        Array.ConvertAll(servicesToInstall.ToArray(),
+                                         s => s.DisplayName));
+                LogHelper.WriteLine("Installing services '{0}'...", displayNamesToInstall);
+                var transactedInstaller = createTransactedInstaller(
+                    servicesToInstall, commandLineArguments);
+                
+                transactedInstaller.Install(new Hashtable());
+                LogHelper.WriteLine("Service '{0}' successfully installed.", displayNamesToInstall);
+                Console.WriteLine("Service '{0}' successfully installed.", displayNamesToInstall);
+
+                foreach (var serviceInfo in servicesToInstall)
+                {
                     ServiceControlHelper.SetServiceRecoveryOptions(
-                        configuration.ServiceName,
-                        configuration.RecoveryOptions);
-                    if(configuration.AllowServiceToInteractWithDesktop)
+                        serviceInfo.ServiceName,
+                        serviceInfo.RecoveryOptions);
+                    if (serviceInfo.Interactive)
                     {
-                        ServiceControlHelper.AllowServiceToInteractWithDesktop(configuration.ServiceName);
+                        ServiceControlHelper.AllowServiceToInteractWithDesktop(serviceInfo.ServiceName);
                     }
-                    
                 }
-                catch (Exception e)
-                {                    
-                    LogHelper.Error(e);
-                }
+            }
+            catch (Exception e)
+            {                    
+                LogHelper.Error(e);
             }
             LogHelper.LeaveFunction();
         }
 
-        public void Uninstall(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public void Uninstall(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
+            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
-            if (!ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+
+            var serviceLocator = ServiceLocator.Current;
+            if (serviceLocator == null)
             {
-                LogHelper.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
-                Console.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
+                throw new InvalidOperationException("An error occured while getting service locator.");
             }
-            else
+
+            var servicesToUninstall = new List<ServiceInfo>();
+            foreach (var serviceInfo in configuration.Services)
             {
-                try
+                var serviceInstance =
+                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.Id);
+                if (serviceInstance == null)
                 {
-                    LogHelper.WriteLine("Uninstalling service '{0}'...", configuration.DisplayName);
-                    var transactedInstaller = createTransactedInstaller(configuration, serviceInstance);
-                    transactedInstaller.Uninstall(null);
-                    LogHelper.WriteLine("Service '{0}' successfully uninstalled.", configuration.DisplayName);
-                    Console.WriteLine("Service '{0}' successfully uninstalled.", configuration.DisplayName);
-                }
-                catch (Exception e)
+                    throw new InvalidOperationException(
+                        string.Format("An error located while resolving service instance '{0}'. ", serviceInfo.ServiceName));
+                }                
+            
+                if (!ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName))
                 {
-                    LogHelper.Error(e);
+                    LogHelper.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
+                    Console.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
+                    continue;
                 }
-            } 
+
+                servicesToUninstall.Add(serviceInfo);
+            }
+
+            if(servicesToUninstall.Count == 0)
+            {
+                LogHelper.WriteLine("There are  no serices to uninstall.  Skipping uninstall operation.");
+                Console.WriteLine("There are  no serices to uninstall.  Skipping uninstall operation.");
+                return;
+            }
+
+            try
+            {
+                string displayNamesToUninstall =
+                    string.Join("','",
+                        Array.ConvertAll(servicesToUninstall.ToArray(),
+                                         s => s.DisplayName));
+                LogHelper.WriteLine("Uninstalling services '{0}'...", displayNamesToUninstall);
+                var transactedInstaller = createTransactedInstaller(
+                    servicesToUninstall, commandLineArguments);
+
+                transactedInstaller.Uninstall(null);
+                LogHelper.WriteLine("Service '{0}' successfully uninstalled.", displayNamesToUninstall);
+                Console.WriteLine("Service '{0}' successfully uninstalled.", displayNamesToUninstall);
+            }
+            catch (Exception e)
+            {
+                LogHelper.Error(e);
+            }
             LogHelper.LeaveFunction();
         }        
 
-        private TransactedInstaller createTransactedInstaller(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        private TransactedInstaller createTransactedInstaller(
+            IEnumerable<ServiceInfo> services,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration);
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            
+            LogHelper.EnterFunction(services);
+            ThrowHelper.ThrowArgumentNullIfNull(services, "services");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+
             var transactedInstaller = new TransactedInstaller();
-            var serviceInstaller = new WindowsServiceInstaller(configuration);
-            transactedInstaller.Installers.Add(serviceInstaller);            
+            var installGroup = new Installer();
+            foreach (var serviceInfo in services)
+            {
+                installGroup.Installers.Add(
+                    createServiceInstaller(serviceInfo));
+            }
+            installGroup.Installers.Add(
+                createServiceProcessInstaller(commandLineArguments));
+            transactedInstaller.Installers.Add(installGroup);
 
             string assemblyPath = string.Format("/assemblypath={0}",
-                serviceInstance.GetType().Assembly.Location);
+                Assembly.GetEntryAssembly().Location);
             var args = new List<string> { assemblyPath };
             args.AddRange(
                 getInstallContextArguments(
-                    configuration));
+                    commandLineArguments));
 
             var installContext = new InstallContext("", args.ToArray());
             transactedInstaller.Context = installContext;
@@ -117,25 +197,98 @@ namespace Daemoniq.Core.Commands
         }
 
         private IEnumerable<string> getInstallContextArguments
-            (IConfiguration configuration)
-        {            
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            
-            if (!string.IsNullOrEmpty(configuration.LogFile))
-                yield return string.Format("/logfile={0}", configuration.LogFile);
+            (CommandLineArguments commandLineArguments)
+        {
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
 
-            if (configuration.LogToConsole.HasValue)
-                yield return string.Format("/logtoconsole={0}", configuration.LogToConsole.Value);
+            if (!string.IsNullOrEmpty(commandLineArguments.LogFile))
+                yield return string.Format("/logfile={0}", commandLineArguments.LogFile);
 
-            if (configuration.ShowCallStack.HasValue)
+            if (commandLineArguments.LogToConsole.HasValue)
+                yield return string.Format("/logtoconsole={0}", commandLineArguments.LogToConsole.Value);
+
+            if (commandLineArguments.ShowCallStack.HasValue)
                 yield return string.Format("/showcallstack");
+        }        
+
+        private ServiceInstaller createServiceInstaller(ServiceInfo serviceInfo)
+        {
+            var serviceInstaller = new ServiceInstaller
+            {
+                ServiceName = serviceInfo.ServiceName,
+                Description = serviceInfo.Description,
+                DisplayName = serviceInfo.DisplayName,
+                StartType = toServiceStartMode(serviceInfo.StartMode)
+            };
+
+            if (serviceInfo.ServicesDependedOn.Count > 0)
+            {
+                int numberOfServicesDependedOn = serviceInfo.ServicesDependedOn.Count;
+                serviceInstaller.ServicesDependedOn = new string[numberOfServicesDependedOn];
+                for (int i = 0; i < numberOfServicesDependedOn; i++)
+                {
+                    var serviceDependedOn = serviceInfo.ServicesDependedOn[i];
+                    serviceInstaller.ServicesDependedOn[i] = serviceDependedOn;
+                }
+            }
+
+            return serviceInstaller;
         }
 
-        #region ICommand Members
+        private ServiceProcessInstaller createServiceProcessInstaller(
+            CommandLineArguments commandLineArguments)
+        {
+            var accountInfo = commandLineArguments.AccountInfo;
+            var serviceProcessInstaller = new ServiceProcessInstaller();
 
-        public abstract void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance);
+            serviceProcessInstaller.Account = toServiceAccount(accountInfo.AccountType);
+            if (accountInfo.AccountType == AccountType.User &&
+                !string.IsNullOrEmpty(accountInfo.Username) &&
+                !string.IsNullOrEmpty(accountInfo.Password))
+            {
+                serviceProcessInstaller.Username = accountInfo.Username;
+                serviceProcessInstaller.Password = accountInfo.Password;
+            }
+            return serviceProcessInstaller;
+        }
 
-        #endregion
+        private ServiceAccount toServiceAccount(AccountType accountType)
+        {
+            ServiceAccount serviceAccount = default(ServiceAccount);
+            switch (accountType)
+            {
+                case AccountType.LocalService:
+                    serviceAccount = ServiceAccount.LocalService;
+                    break;
+                case AccountType.LocalSystem:
+                    serviceAccount = ServiceAccount.LocalSystem;
+                    break;
+                case AccountType.NetworkService:
+                    serviceAccount = ServiceAccount.NetworkService;
+                    break;
+                case AccountType.User:
+                    serviceAccount = ServiceAccount.User;
+                    break;
+            }
+            return serviceAccount;
+        }
+
+        private ServiceStartMode toServiceStartMode(StartMode startMode)
+        {
+            ServiceStartMode serviceStartMode = default(ServiceStartMode);
+            switch (startMode)
+            {
+                case StartMode.Automatic:
+                    serviceStartMode = ServiceStartMode.Automatic;
+                    break;
+                case StartMode.Disabled:
+                    serviceStartMode = ServiceStartMode.Disabled;
+                    break;
+                case StartMode.Manual:
+                    serviceStartMode = ServiceStartMode.Manual;
+                    break;
+            }
+            return serviceStartMode;
+        }
     }
 }

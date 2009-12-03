@@ -20,9 +20,8 @@ namespace Daemoniq.Configuration
     [ConfigurationCollection(typeof(ServiceElement),
         CollectionType = ConfigurationElementCollectionType.BasicMap,
         AddItemName = "service")]
-     public class ServiceElementCollection
+    public class ServiceElementCollection
         : ConfigurationElementCollection<ServiceElement>
     {
     }
 }
-

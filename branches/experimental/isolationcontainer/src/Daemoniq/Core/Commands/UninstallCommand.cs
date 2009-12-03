@@ -19,13 +19,14 @@ namespace Daemoniq.Core.Commands
 {
     class UninstallCommand : InstallerCommandBase        
     {
-        public override void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public override void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
+            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
-            Uninstall(configuration, serviceInstance);
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            Uninstall(configuration, commandLineArguments);
             LogHelper.LeaveFunction();
         }
     }
