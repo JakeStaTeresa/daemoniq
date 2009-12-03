@@ -14,58 +14,140 @@
  *  limitations under the License.
  */
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration.Install;
+using System.Reflection;
 using System.ServiceProcess;
-using System.ComponentModel;
-
 using Daemoniq.Framework;
 
 namespace Daemoniq.Core
 {
-    [Obsolete]
-    [RunInstaller(true)]
-    class WindowsServiceInstaller : Installer
+    class WindowsServiceInstaller : IDisposable
     {
-        public WindowsServiceInstaller() { }
-        
-        public WindowsServiceInstaller(IConfiguration configuration)
-        {
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
+        private readonly TransactedInstaller transactedInstaller;
 
-            var serviceInstaller = new ServiceInstaller
-                                       {
-                                           ServiceName = configuration.ServiceName,
-                                           Description = configuration.Description,
-                                           DisplayName = configuration.DisplayName,
-                                           StartType = toServiceStartMode(configuration.StartMode)
-                                       };
-            
-            if(configuration.ServicesDependedOn.Count > 0)
+        public WindowsServiceInstaller(
+            IEnumerable<ServiceInfo> services,
+            CommandLineArguments commandLineArguments)
+        {
+            LogHelper.EnterFunction(services, commandLineArguments);
+            ThrowHelper.ThrowArgumentNullIfNull(services, "services");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+
+            transactedInstaller = createTransactedInstaller(
+                services,
+                commandLineArguments);
+        }
+
+        public void Install()
+        {
+            transactedInstaller.Install(new Hashtable());
+        }
+
+        public void Uninstall()
+        {
+            transactedInstaller.Uninstall(null);
+        }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            transactedInstaller.Dispose();
+        }
+
+        #endregion
+
+        private TransactedInstaller createTransactedInstaller(
+            IEnumerable<ServiceInfo> services,
+            CommandLineArguments commandLineArguments)
+        {
+            LogHelper.EnterFunction(services);
+            ThrowHelper.ThrowArgumentNullIfNull(services, "services");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+
+            var returnValue = new TransactedInstaller();
+            var installGroup = new Installer();
+            foreach (var serviceInfo in services)
             {
-                int numberOfServicesDependedOn = configuration.ServicesDependedOn.Count;
+                installGroup.Installers.Add(
+                    createServiceInstaller(serviceInfo));
+            }
+            installGroup.Installers.Add(
+                createServiceProcessInstaller(commandLineArguments));
+            returnValue.Installers.Add(installGroup);
+
+            string assemblyPath = string.Format("/assemblypath={0}",
+                Assembly.GetEntryAssembly().Location);
+            var args = new List<string> { assemblyPath };
+            args.AddRange(
+                getInstallContextArguments(
+                    commandLineArguments));
+
+            var installContext = new InstallContext("", args.ToArray());
+            returnValue.Context = installContext;
+
+            LogHelper.LeaveFunction();
+            return returnValue;
+        }
+        
+        private ServiceInstaller createServiceInstaller(ServiceInfo serviceInfo)
+        {
+            var serviceInstaller = new ServiceInstaller
+            {
+                ServiceName = serviceInfo.ServiceName,
+                Description = serviceInfo.Description,
+                DisplayName = serviceInfo.DisplayName,
+                StartType = toServiceStartMode(serviceInfo.StartMode)
+            };
+
+            if (serviceInfo.ServicesDependedOn.Count > 0)
+            {
+                int numberOfServicesDependedOn = serviceInfo.ServicesDependedOn.Count;
                 serviceInstaller.ServicesDependedOn = new string[numberOfServicesDependedOn];
                 for (int i = 0; i < numberOfServicesDependedOn; i++)
                 {
-                    string serviceName = configuration.ServicesDependedOn[i];
-                    serviceInstaller.ServicesDependedOn[i] = serviceName;
+                    var serviceDependedOn = serviceInfo.ServicesDependedOn[i];
+                    serviceInstaller.ServicesDependedOn[i] = serviceDependedOn;
                 }
             }
 
-            var accountInfo = configuration.AccountInfo;
-            var serviceProcessInstaller = new ServiceProcessInstaller();            
+            return serviceInstaller;
+        }
+
+        private ServiceProcessInstaller createServiceProcessInstaller(
+            CommandLineArguments commandLineArguments)
+        {
+            var accountInfo = commandLineArguments.AccountInfo;
+            var serviceProcessInstaller = new ServiceProcessInstaller();
 
             serviceProcessInstaller.Account = toServiceAccount(accountInfo.AccountType);
             if (accountInfo.AccountType == AccountType.User &&
                 !string.IsNullOrEmpty(accountInfo.Username) &&
                 !string.IsNullOrEmpty(accountInfo.Password))
-            {                
+            {
                 serviceProcessInstaller.Username = accountInfo.Username;
                 serviceProcessInstaller.Password = accountInfo.Password;
             }
-            Installers.Add(serviceInstaller);
-            Installers.Add(serviceProcessInstaller);
+            return serviceProcessInstaller;
         }
-       
+
+        private IEnumerable<string> getInstallContextArguments
+            (CommandLineArguments commandLineArguments)
+        {
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+
+            if (!string.IsNullOrEmpty(commandLineArguments.LogFile))
+                yield return string.Format("/logfile={0}", commandLineArguments.LogFile);
+
+            if (commandLineArguments.LogToConsole.HasValue)
+                yield return string.Format("/logtoconsole={0}", commandLineArguments.LogToConsole.Value);
+
+            if (commandLineArguments.ShowCallStack.HasValue)
+                yield return string.Format("/showcallstack");
+        }
+
         private ServiceAccount toServiceAccount(AccountType accountType)
         {
             ServiceAccount serviceAccount = default(ServiceAccount);
@@ -103,6 +185,6 @@ namespace Daemoniq.Core
                     break;                
             }
             return serviceStartMode;
-        }
+        }        
     }
 }

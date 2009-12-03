@@ -81,6 +81,8 @@
     <Compile Include="Configuration\ConfigurationElementCollection.cs" />
     <Compile Include="Core\LogHelper.cs" />
     <Compile Include="Core\ServiceControlHelper.cs" />
+    <Compile Include="Core\WindowsServiceInstaller.cs">
+    </Compile>
     <Compile Include="Framework\ServiceInfo.cs" />
     <Compile Include="Core\ThrowHelper.cs" />
     <Compile Include="Framework\AccountInfo.cs" />
