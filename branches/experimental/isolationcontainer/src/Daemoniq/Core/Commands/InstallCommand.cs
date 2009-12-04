@@ -24,11 +24,16 @@ namespace Daemoniq.Core.Commands
             IConfiguration configuration,
             CommandLineArguments commandLineArguments)
         {
+            LogHelper.EnterFunction(configuration, commandLineArguments);
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+
             Assembly entryAssembly = Assembly.GetEntryAssembly();
             ThrowHelper.ThrowInvalidOperationExceptionIf(
                 a => a == null, entryAssembly,
                 "Unable to get entry assembly.");
             Execute(configuration, commandLineArguments, entryAssembly.Location);
+            LogHelper.LeaveFunction();
         }
 
         public void Execute(
@@ -36,9 +41,10 @@ namespace Daemoniq.Core.Commands
             CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
+            LogHelper.EnterFunction(configuration, commandLineArguments, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
 
             Install(configuration, commandLineArguments, assemblyPath);
             LogHelper.LeaveFunction();
