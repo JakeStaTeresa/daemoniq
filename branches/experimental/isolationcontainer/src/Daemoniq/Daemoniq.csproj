@@ -68,7 +68,6 @@
     <Compile Include="Core\Cli\Parser.cs" />
     <Compile Include="Core\Cli\ParseResult.cs" />
     <Compile Include="Core\CommandLineArguments.cs" />
-    <Compile Include="Core\Commands\CommandBase.cs" />
     <Compile Include="Core\Commands\CommandFactory.cs" />
     <Compile Include="Core\Commands\ConsoleCommand.cs" />
     <Compile Include="Core\Commands\ICommand.cs" />

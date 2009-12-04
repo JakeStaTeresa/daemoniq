@@ -62,11 +62,6 @@ namespace Daemoniq.Core.Commands
 
             try
             {
-                string displayNamesToInstall =
-                    string.Join(",",
-                        Array.ConvertAll(servicesToRun.ToArray(),
-                                         s => s.ServiceName));
-
                 LogHelper.WriteLine("Starting service process...");
                 ServiceBase.Run(servicesToRun.ToArray());
             }

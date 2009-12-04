@@ -51,7 +51,7 @@ namespace Daemoniq.Tests.Framework
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void WillThrowInvalidOperationWhenRebootMessageIsDefinedAndFailureActionRestartTheComputerIsNotDefined()
+        public void WillThrowInvalidOperationWhenRebootMessageIsDefinedAndFailureActionIsNotRestartTheComputer()
         {
             var serviceRecoveryOptions = new ServiceRecoveryOptions();
             serviceRecoveryOptions.RebootMessage = "This is a sample reboot message";
@@ -69,7 +69,7 @@ namespace Daemoniq.Tests.Framework
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void WillThrowInvalidOperationWhenCommandToLaunchOnFailureIsDefinedAndFailureActionRunAProgramIsNotDefined()
+        public void WillThrowInvalidOperationWhenCommandToLaunchOnFailureIsDefinedAndFailureActionIsNotRunAProgram()
         {
             var serviceRecoveryOptions = new ServiceRecoveryOptions();
             serviceRecoveryOptions.CommandToLaunchOnFailure = "Sample.exe";
@@ -87,7 +87,7 @@ namespace Daemoniq.Tests.Framework
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void WillThrowInvalidOperationWhenMinutesToRestartServiceIsDefinedAndFailureActionRunAProgramIsNotDefined()
+        public void WillThrowInvalidOperationWhenMinutesToRestartServiceIsDefinedAndFailureActionIsNotRunAProgram()
         {
             var serviceRecoveryOptions = new ServiceRecoveryOptions();
             serviceRecoveryOptions.MinutesToRestartService = 100;

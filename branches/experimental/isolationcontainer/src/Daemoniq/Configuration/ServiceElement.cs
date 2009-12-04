@@ -26,14 +26,14 @@ namespace Daemoniq.Configuration
             StartMode = StartMode.Manual;
         }
 
-        [ConfigurationProperty("id")]
+        [ConfigurationProperty("id", IsRequired = true, IsKey = true)]
         public string Id
         {
             get { return (string)(base["id"]); }
             set { base["id"] = value; }
         }
 
-        [ConfigurationProperty("serviceName", IsRequired = true, IsKey = true)]
+        [ConfigurationProperty("serviceName")]
         public string ServiceName
         {
             get { return (string)(base["serviceName"]); }

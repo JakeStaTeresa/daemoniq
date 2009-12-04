@@ -20,11 +20,11 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
-    class ConsoleCommand : CommandBase
+    class ConsoleCommand : ICommand
     {
         #region ICommand Members
 
-        public override void Execute(
+        public void Execute(
             IConfiguration configuration,
             CommandLineArguments commandLineArguments)
         {
