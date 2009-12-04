@@ -14,7 +14,6 @@ namespace Daemoniq.Framework
             RecoveryOptions = new ServiceRecoveryOptions();
         }
 
-        public string Id { get; set; }
         public string ServiceName { get; set; }                
         public string DisplayName { get; set; }        
         public string Description { get; set; }
@@ -28,7 +27,6 @@ namespace Daemoniq.Framework
         public static ServiceInfo FromConfiguration(ServiceElement serviceElement)
         {
             var serviceInfo = new ServiceInfo();
-            serviceInfo.Id = serviceElement.Id;
             serviceInfo.ServiceName = serviceElement.ServiceName;
             serviceInfo.DisplayName = serviceElement.DisplayName;
             serviceInfo.Description = serviceElement.Description;

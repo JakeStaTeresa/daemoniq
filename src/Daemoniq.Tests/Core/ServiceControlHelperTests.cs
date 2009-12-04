@@ -45,7 +45,6 @@ namespace Daemoniq.Tests.Core
                 ConfigurationAction.Install);
 
             var serviceInfo = new ServiceInfo();
-            serviceInfo.Id = "Dummy:SRHT";
             serviceInfo.ServiceName = "Dummy:SRHT";
             serviceInfo.DisplayName = "Dummy-ServiceRecoveryHelperTest";
 
