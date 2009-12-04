@@ -375,7 +375,7 @@ namespace Daemoniq.Core
             bool returnValue = GetInstalledServices().Contains(serviceName);
             LogHelper.LeaveFunction();
             return returnValue;
-        }
+        }        
 
         public static void AllowServiceToInteractWithDesktop(string serviceName)
         {

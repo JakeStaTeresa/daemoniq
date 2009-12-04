@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using Daemoniq.Framework;
 using NUnit.Framework;
 
 namespace Daemoniq.Tests.Framework
@@ -25,19 +24,8 @@ namespace Daemoniq.Tests.Framework
         public void DefaultPropertyTest()
         {
             var configuration = new Daemoniq.Framework.Configuration();
-            var accountInfo = new AccountInfo(AccountType.User);
-            Assert.AreEqual(accountInfo.AccountType, configuration.AccountInfo.AccountType);
-            Assert.AreEqual(accountInfo.Username, configuration.AccountInfo.Username);
-            Assert.AreEqual(accountInfo.Password, configuration.AccountInfo.Password);
-            Assert.AreEqual(ConfigurationAction.Run, configuration.Action);
-            Assert.IsNull(configuration.Description);
-            Assert.IsNull(configuration.DisplayName);
-            Assert.IsNull(configuration.LogFile);
-            Assert.IsNull(configuration.LogToConsole);
-            Assert.IsNull(configuration.ServiceName);
-            Assert.IsNull(configuration.ShowCallStack);
-            Assert.AreEqual(0, configuration.ServicesDependedOn.Count);
-            Assert.AreEqual(StartMode.Manual, configuration.StartMode);
+            Assert.IsNotNull(configuration.Services);
+            Assert.AreEqual(0, configuration.Services.Count);
         }
     }
 }

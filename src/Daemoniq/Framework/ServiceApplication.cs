@@ -20,30 +20,22 @@ using Daemoniq.Core.Commands;
 
 namespace Daemoniq.Framework
 {
-    public class ServiceApplication<TService>
-        where TService:IServiceInstance, new()
+    public class ServiceApplication
     {
-        private readonly IConfigurer configurer;
+        public IConfigurer Configurer { get; set; }
 
         public ServiceApplication()
-            :this(new DefaultConfigurer())
-        {            
-        }
-
-        public ServiceApplication(IConfigurer configurer)
         {
-            this.configurer = configurer;
+            Configurer = new DefaultConfigurer();
         }
-
-        public IConfigurer Configurer { get { return configurer; } }        
 
         public void Run(string[] arguments)
         {
             LogHelper.EnterFunction(arguments);
             ThrowHelper.ThrowArgumentNullIfNull(arguments, "arguments");
 
-            IConfiguration configuration = new Configuration();
-            Parser parser = initializeParser(configuration);
+            var commandLineArguments = new CommandLineArguments();
+            Parser parser = initializeParser(commandLineArguments);
             bool runningAsService = isRunningAsService();
             if (runningAsService)
             {
@@ -66,21 +58,14 @@ namespace Daemoniq.Framework
                 return;
             }       
 
-            IServiceInstance serviceInstance = new TService();
-            configuration.ServiceName = serviceInstance.ServiceName;
-            configuration.DisplayName = serviceInstance.DisplayName;
-            configuration.Description = serviceInstance.Description;
-            configuration.ServicesDependedOn.AddRange(serviceInstance.ServicesDependedOn);
-            configuration.AllowServiceToInteractWithDesktop = parseResult.Arguments.ContainsKey("interactive") &&
-                                                              parseResult.Arguments["interactive"] == "true";
-
-            Configurer.Configure(configuration);
-            var command = CommandFactory.CreateInstance(configuration.Action);
-            command.Execute(configuration, serviceInstance);
+            IConfiguration configuration =  Configurer.Configure();
+            var command = CommandFactory.CreateInstance(commandLineArguments.Action);
+            command.Execute(configuration, commandLineArguments);
             LogHelper.LeaveFunction();
         }
 
-        private Parser initializeParser(IConfiguration configuration)
+        private Parser initializeParser(
+            CommandLineArguments commandLineArguments)
         {           
             var parser = new Parser();
             parser.Arguments.Add(
@@ -159,7 +144,7 @@ namespace Daemoniq.Framework
                         Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                                   parseResult.Arguments["action"] == "install",
                         ValidArguments = new[] { "action", "credentials", "username", "password", "interactive", "logToConsole", "showCallStack", "logFile" },
-                        Action = parseResult => installAction(parseResult, configuration)
+                        Action = parseResult => installAction(parseResult, commandLineArguments)
                 });
             parser.Contexts.Add(
                 new ContextInfo
@@ -167,7 +152,7 @@ namespace Daemoniq.Framework
                     Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                               parseResult.Arguments["action"] == "uninstall",
                     ValidArguments = new[] { "action", "logToConsole", "showCallStack", "logFile" },
-                    Action = parseResult => uninstallAction(parseResult, configuration)
+                    Action = parseResult => uninstallAction(parseResult, commandLineArguments)
                 });
             parser.Contexts.Add(
                 new ContextInfo
@@ -175,7 +160,7 @@ namespace Daemoniq.Framework
                     Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                               parseResult.Arguments["action"] == "debug",
                     ValidArguments = new[] { "action" },
-                    Action = parseResult => configuration.Action = ConfigurationAction.Console
+                    Action = parseResult => commandLineArguments.Action = ConfigurationAction.Console
                 });
             parser.Contexts.Add(
                 new ContextInfo
@@ -183,35 +168,35 @@ namespace Daemoniq.Framework
                     Selector = parseResult => parseResult.Arguments.ContainsKey("action") &&
                                               parseResult.Arguments["action"] == "run",
                     ValidArguments = new[] { "action" },
-                    Action = parseResult => configuration.Action = ConfigurationAction.Run
+                    Action = parseResult => commandLineArguments.Action = ConfigurationAction.Run
                 });
             
             return parser;
         }
 
         private void commonInstallerAction(ParseResult parseResult,
-            IConfiguration configuration)
+            CommandLineArguments commandLineArguments)
         {
             if (parseResult.Arguments.ContainsKey("logToConsole"))
             {
-                configuration.LogToConsole = parseResult.Arguments["logToConsole"] == "true";
+                commandLineArguments.LogToConsole = parseResult.Arguments["logToConsole"] == "true";
             }
 
             if (parseResult.Arguments.ContainsKey("showCallStack"))
             {
-                configuration.ShowCallStack = parseResult.Arguments["showCallStack"] == "true";
+                commandLineArguments.ShowCallStack = parseResult.Arguments["showCallStack"] == "true";
             }
             
             if(parseResult.Arguments.ContainsKey("showCallStack"))
             {
-                configuration.LogFile = parseResult.Arguments["logFile"];
+                commandLineArguments.LogFile = parseResult.Arguments["logFile"];
             }
         }
 
-        private void installAction(ParseResult parseResult, 
-            IConfiguration configuration)
+        private void installAction(ParseResult parseResult,
+            CommandLineArguments commandLineArguments)
         {
-            configuration.Action = ConfigurationAction.Install;
+            commandLineArguments.Action = ConfigurationAction.Install;
             bool credentialsExists = parseResult.Arguments.ContainsKey("credentials");
             if (!credentialsExists)
             {
@@ -228,18 +213,18 @@ namespace Daemoniq.Framework
                 {
                     case "localSystem":
                         validateInstallArguments(parseResult,
-                            new [] { "action","credentials", "interactive" });  
-                        configuration.AccountInfo = new AccountInfo(AccountType.LocalSystem);                        
+                            new [] { "action","credentials", "interactive" });
+                        commandLineArguments.AccountInfo = new AccountInfo(AccountType.LocalSystem);                        
                         break;
                     case "localService":
                         validateInstallArguments(parseResult,
                             new[] { "action", "credentials" });
-                        configuration.AccountInfo = new AccountInfo(AccountType.LocalService);
+                        commandLineArguments.AccountInfo = new AccountInfo(AccountType.LocalService);
                         break;
                     case "networkService":
                         validateInstallArguments(parseResult,
                             new[] { "action", "credentials" });
-                        configuration.AccountInfo = new AccountInfo(AccountType.NetworkService);
+                        commandLineArguments.AccountInfo = new AccountInfo(AccountType.NetworkService);
                         break;
                     case "user":
                         validateInstallArguments(parseResult,
@@ -257,14 +242,14 @@ namespace Daemoniq.Framework
                         if (parseResult.Arguments.ContainsKey("username") &&
                             parseResult.Arguments.ContainsKey("password"))
                         {
-                            configuration.AccountInfo = new AccountInfo(
+                            commandLineArguments.AccountInfo = new AccountInfo(
                                 parseResult.Arguments["username"],
                                 parseResult.Arguments["password"]);
                         }
                         break;
                 }
             }
-            commonInstallerAction(parseResult, configuration);
+            commonInstallerAction(parseResult, commandLineArguments);
         }
 
         private void validateInstallArguments(ParseResult parseResult,
@@ -283,10 +268,10 @@ namespace Daemoniq.Framework
         }
 
         private void uninstallAction(ParseResult parseResult,
-            IConfiguration configuration)
+            CommandLineArguments commandLineArguments)
         {
-            configuration.Action = ConfigurationAction.Uninstall;
-            commonInstallerAction(parseResult, configuration);
+            commandLineArguments.Action = ConfigurationAction.Uninstall;
+            commonInstallerAction(parseResult, commandLineArguments);
         }
 
         private  bool isRunningAsService()

@@ -13,21 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using System.Collections.Generic;
+using Daemoniq.Framework;
+using NUnit.Framework;
 
-namespace Daemoniq.Framework
+namespace Daemoniq.Tests.Core
 {
-    public class Configuration:IConfiguration
+    [TestFixture]
+    public class InstallCommandTests:CommandTestBase
     {
-        private readonly List<ServiceInfo> services = new List<ServiceInfo>();
-
-        #region IConfiguration Members
-
-        public List<ServiceInfo> Services
+        public InstallCommandTests()
         {
-            get { return services; }
+            Action = ConfigurationAction.Install;
         }
-
-        #endregion
     }
 }

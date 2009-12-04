@@ -45,6 +45,13 @@
        </msbuild>       
     </target>
     
+    <target name="test" description="Running nunit tests">
+      <nunit2>
+        <formatter type="Xml" usefile="true" extension=".xml" outputdir="." />
+        <test assemblyname="${output.binary.path}/Daemoniq.Tests.dll" />
+      </nunit2>
+    </target>
+    
     <target name="package" description="Packaging to zip file">
         <mkdir dir="${package.path}" />
         <zip zipfile="${package.path}/${binaries.package}">
@@ -76,5 +83,5 @@
           </fileset>                        
         </zip>
     </target>
-    <target name="full-build" depends="clean, build, package" />
+    <target name="full-build" depends="clean, build, test, package" />
 </project>

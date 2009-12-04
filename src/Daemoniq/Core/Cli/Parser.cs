@@ -343,8 +343,7 @@ namespace Daemoniq.Core.Cli
                     }
                     else
                     {
-                        Console.Write("x");
-                        //Console.Beep();
+                        Console.Beep();
                     }
                 }
                 else if (info.Key == ConsoleKey.Backspace)
@@ -362,6 +361,7 @@ namespace Daemoniq.Core.Cli
                     }
                 }
             } while (true);
+            Console.WriteLine();
             return password;
         }
 

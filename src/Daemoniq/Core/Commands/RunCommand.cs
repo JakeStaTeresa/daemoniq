@@ -14,36 +14,61 @@
  *  limitations under the License.
  */
 using System;
+using System.Collections.Generic;
 using System.ServiceProcess;
 using Daemoniq.Framework;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
     class RunCommand : InstallerCommandBase        
     {
-        public override void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public override void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
+            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
 
-            if (!ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
+            var serviceLocator = ServiceLocator.Current;
+            if (serviceLocator == null)
             {
-                LogHelper.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
+                throw new InvalidOperationException("An error occured while getting service locator.");
             }
-            else
+
+            var servicesToRun = new List<ServiceBase>();
+            foreach (var serviceInfo in configuration.Services)
             {
-                try
+                if (!ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName))
                 {
-                    LogHelper.WriteLine("Starting service process...");
-                    ServiceBase.Run(new WindowsServiceBase(serviceInstance));
+                    LogHelper.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
+                    Console.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
+                    continue;
                 }
-                catch (Exception e)
-                {             
-                    LogHelper.Error(e);                   
+
+                var serviceInstance =
+                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.Id);
+                if (serviceInstance == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("An error located while resolving service instance '{0}'. ", serviceInfo.ServiceName));
                 }
+
+                servicesToRun.Add(new WindowsServiceBase(
+                    serviceInfo.ServiceName,
+                    serviceInstance));
             }
+
+            try
+            {
+                LogHelper.WriteLine("Starting service process...");
+                ServiceBase.Run(servicesToRun.ToArray());
+            }
+            catch (Exception e)
+            {             
+                LogHelper.Error(e);                   
+            }            
             LogHelper.LeaveFunction();
         }
     }

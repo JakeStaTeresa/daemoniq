@@ -13,18 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using System.Collections.Generic;
 using System.ServiceProcess;
 
 namespace Daemoniq.Framework
 {
     public interface IServiceInstance
     {
-        string ServiceName { get; }
-        string DisplayName { get; }
-        string Description { get; }
-        IEnumerable<string> ServicesDependedOn { get; }
-        
         bool CanHandleCustomCommand { get; }        
         bool CanHandlePowerEvent { get; }
         bool CanHandleSessionChangeEvent { get; }

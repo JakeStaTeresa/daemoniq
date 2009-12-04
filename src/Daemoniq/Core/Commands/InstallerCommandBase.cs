@@ -14,128 +14,193 @@
  *  limitations under the License.
  */
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Configuration.Install;
+using System.Linq;
 using Daemoniq.Framework;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
     abstract class InstallerCommandBase : ICommand        
     {
-        public void Install(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        public void Install(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments,
+            string assemblyPath)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
-
-            if (ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
-            {                         
-                LogHelper.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);
-                Console.WriteLine("Service '{0}' is already installed.", configuration.DisplayName);
-            }
-            else
-            {
-                try
-                {
-                    LogHelper.WriteLine("Installing service '{0}'...", configuration.DisplayName);
-                    var transactedInstaller = createTransactedInstaller(configuration, serviceInstance);
-                    
-                    transactedInstaller.Install(new Hashtable());
-                    LogHelper.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
-                    Console.WriteLine("Service '{0}' successfully installed.", configuration.DisplayName);
-
-                    ServiceControlHelper.SetServiceRecoveryOptions(
-                        configuration.ServiceName,
-                        configuration.RecoveryOptions);
-                    if(configuration.AllowServiceToInteractWithDesktop)
+            performOperation(
+                configuration,
+                commandLineArguments,
+                assemblyPath,
+                serviceInfo => ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
+                serviceInfo => string.Format("Service '{0}' is already installed.", serviceInfo.DisplayName),
+                "There are  no serices to install.  Skipping install operation.",
+                displayNames => string.Format("Installing services '{0}'...", displayNames),
+                installer => installer.Install(),
+                displayNames => string.Format("Services '{0}' successfully installed.", displayNames),
+                services =>
                     {
-                        ServiceControlHelper.AllowServiceToInteractWithDesktop(configuration.ServiceName);
-                    }
-                    
+                        foreach (var serviceInfo in services)
+                        {
+                            ServiceControlHelper.SetServiceRecoveryOptions(
+                                serviceInfo.ServiceName,
+                                serviceInfo.RecoveryOptions);
+                            if (commandLineArguments.AllowServiceToInteractWithDesktop)
+                            {
+                                ServiceControlHelper.AllowServiceToInteractWithDesktop(serviceInfo.ServiceName);
+                            }
+                        }
+                    });
+        }
+
+        public void Uninstall(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments,
+            string assemblyPath)
+        {
+            performOperation(
+                configuration,
+                commandLineArguments,
+                assemblyPath,
+                serviceInfo => !ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
+                serviceInfo => string.Format("Service '{0}' is not yet installed.", serviceInfo.DisplayName),
+                "There are  no serices to uninstall.  Skipping uninstall operation.",
+                displayNames => string.Format("Uninstalling services '{0}'...", displayNames),
+                installer => installer.Uninstall(),
+                displayNames => string.Format("Services '{0}' successfully uninstalled.", displayNames),
+                services => { });
+        }
+
+        public abstract void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments); 
+
+        private void performOperation(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments,
+            string assemblyPath,
+            Predicate<ServiceInfo> exclusionFilter,
+            Converter<ServiceInfo, string> exclusionMessageConverter,
+            string cancelMessage,
+            Converter<string, string> preOperationMessageConverter,
+            Action<WindowsServiceInstaller> operationAction,
+            Converter<string, string> postOperationMessageConverter,
+            Action<IEnumerable<ServiceInfo>> postOperationAction)
+        {
+            LogHelper.EnterFunction(configuration, 
+                commandLineArguments,
+                assemblyPath,
+                exclusionFilter,
+                exclusionMessageConverter,
+                preOperationMessageConverter,
+                cancelMessage,
+                operationAction,
+                postOperationMessageConverter,
+                postOperationAction);
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
+            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
+            ThrowHelper.ThrowArgumentNullIfNull(exclusionFilter, "exclusionFilter");
+            ThrowHelper.ThrowArgumentNullIfNull(exclusionMessageConverter, "exclusionMessageConverter");
+            ThrowHelper.ThrowArgumentNullIfNull(cancelMessage, "cancelMessage");
+            ThrowHelper.ThrowArgumentNullIfNull(preOperationMessageConverter, "preOperationMessageConverter");
+            ThrowHelper.ThrowArgumentNullIfNull(operationAction, "operationAction");
+            ThrowHelper.ThrowArgumentNullIfNull(postOperationMessageConverter, "postOperationMessageConverter");
+            ThrowHelper.ThrowArgumentNullIfNull(postOperationAction, "postOperationAction");
+
+            var services =
+                getServicesToPerformActionOn(configuration,
+                                              exclusionFilter,
+                                              exclusionMessageConverter);
+
+            if (services.Count == 0)
+            {
+                LogHelper.WriteLine(cancelMessage);
+                Console.WriteLine(cancelMessage);
+                return;
+            }
+
+            checkServicesInContainer(services);
+            
+            try
+            {
+                string displayNames =
+                    string.Join("','", 
+                        Array.ConvertAll(services.ToArray(),
+                                         s => s.DisplayName));
+                string preOperationMessage = preOperationMessageConverter(displayNames);
+                LogHelper.WriteLine(preOperationMessage);
+                Console.WriteLine(preOperationMessage);
+                using(var installer = new WindowsServiceInstaller(
+                    services,
+                    commandLineArguments,
+                    assemblyPath))
+                {
+                    operationAction(installer);
                 }
-                catch (Exception e)
-                {                    
-                    LogHelper.Error(e);
-                }
+                string postOperationMessage = postOperationMessageConverter(displayNames);
+                LogHelper.WriteLine(postOperationMessage);
+                Console.WriteLine(postOperationMessage);
+
+                postOperationAction(services);
+            }
+            catch (Exception e)
+            {                    
+                LogHelper.Error(e);
+                throw;
             }
             LogHelper.LeaveFunction();
         }
 
-        public void Uninstall(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        private IList<ServiceInfo> getServicesToPerformActionOn(
+            IConfiguration configuration,
+            Predicate<ServiceInfo> predicate,
+            Converter<ServiceInfo, string> converter)
         {
-            LogHelper.EnterFunction(configuration, serviceInstance);
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
-            if (!ServiceControlHelper.IsServiceInstalled(configuration.ServiceName))
+            var servicesToPerformActionsOn = new List<ServiceInfo>();
+            foreach (var serviceInfo in configuration.Services)
             {
-                LogHelper.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
-                Console.WriteLine("Service '{0}' is not yet installed.", configuration.DisplayName);
+                if (predicate(serviceInfo))
+                {
+                    string message = converter(serviceInfo);
+                    LogHelper.WriteLine(message);
+                    Console.WriteLine(message);
+                    continue;
+                }
+
+                servicesToPerformActionsOn.Add(serviceInfo);
             }
-            else
-            {
-                try
-                {
-                    LogHelper.WriteLine("Uninstalling service '{0}'...", configuration.DisplayName);
-                    var transactedInstaller = createTransactedInstaller(configuration, serviceInstance);
-                    transactedInstaller.Uninstall(null);
-                    LogHelper.WriteLine("Service '{0}' successfully uninstalled.", configuration.DisplayName);
-                    Console.WriteLine("Service '{0}' successfully uninstalled.", configuration.DisplayName);
-                }
-                catch (Exception e)
-                {
-                    LogHelper.Error(e);
-                }
-            } 
-            LogHelper.LeaveFunction();
-        }        
+            return servicesToPerformActionsOn.AsReadOnly();
+        }
 
-        private TransactedInstaller createTransactedInstaller(IConfiguration configuration,
-            IServiceInstance serviceInstance)
+        private void checkServicesInContainer(
+            IEnumerable<ServiceInfo> services)
         {
-            LogHelper.EnterFunction(configuration);
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            
-            var transactedInstaller = new TransactedInstaller();
-            var serviceInstaller = new WindowsServiceInstaller(configuration);
-            transactedInstaller.Installers.Add(serviceInstaller);            
+            var serviceLocator = default(IServiceLocator);
+            try
+            {
+                serviceLocator = ServiceLocator.Current;
+            }
+            catch (Exception e)
+            {
+                LogHelper.Error(e);
+            }
 
-            string assemblyPath = string.Format("/assemblypath={0}",
-                serviceInstance.GetType().Assembly.Location);
-            var args = new List<string> { assemblyPath };
-            args.AddRange(
-                getInstallContextArguments(
-                    configuration));
+            if (serviceLocator == null)
+            {
+                throw new InvalidOperationException("An error occured while getting service locator.");
+            }
 
-            var installContext = new InstallContext("", args.ToArray());
-            transactedInstaller.Context = installContext;
-
-            LogHelper.LeaveFunction();
-            return transactedInstaller;
+            foreach (var serviceInfo in services)
+            {
+                var serviceInstance =
+                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.Id);
+                if (serviceInstance == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("An error located while resolving service instance '{0}'. ", serviceInfo.ServiceName));
+                }
+            }
         }
-
-        private IEnumerable<string> getInstallContextArguments
-            (IConfiguration configuration)
-        {            
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            
-            if (!string.IsNullOrEmpty(configuration.LogFile))
-                yield return string.Format("/logfile={0}", configuration.LogFile);
-
-            if (configuration.LogToConsole.HasValue)
-                yield return string.Format("/logtoconsole={0}", configuration.LogToConsole.Value);
-
-            if (configuration.ShowCallStack.HasValue)
-                yield return string.Format("/showcallstack");
-        }
-
-        #region ICommand Members
-
-        public abstract void Execute(IConfiguration configuration,
-            IServiceInstance serviceInstance);
-
-        #endregion
     }
 }

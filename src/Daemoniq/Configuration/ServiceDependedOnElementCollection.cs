@@ -13,21 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using System.Collections.Generic;
+using System.Configuration;
 
-namespace Daemoniq.Framework
+namespace Daemoniq.Configuration
 {
-    public class Configuration:IConfiguration
+    [ConfigurationCollection(typeof(ServiceDependedOnElement),
+        CollectionType = ConfigurationElementCollectionType.BasicMap,
+        AddItemName = "service")]
+     public class ServiceDependedOnElementCollection
+        : ConfigurationElementCollection<ServiceDependedOnElement>
     {
-        private readonly List<ServiceInfo> services = new List<ServiceInfo>();
-
-        #region IConfiguration Members
-
-        public List<ServiceInfo> Services
-        {
-            get { return services; }
-        }
-
-        #endregion
     }
 }
