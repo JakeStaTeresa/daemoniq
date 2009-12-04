@@ -1,0 +1,114 @@
+NAnt 0.86 (Build 0.86.2898.0; beta1; 12/8/2007)
+Copyright (C) 2001-2007 Gerry Shaw
+http://nant.sourceforge.net
+
+Buildfile: file:///X:/DotNet/Projects/daemoniq/build/scripts/nant.build
+Target framework: Microsoft .NET Framework 3.5
+Target(s) specified: full-build 
+
+
+clean:
+
+   [delete] Deleting 11 files.
+   [delete] Deleted 2 directories.
+
+build:
+
+  [msbuild] Build started 11/25/2009 1:29:40 AM.
+  [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" on node 0 (default targets).
+  [msbuild]   Processing 0 EDMX files.
+  [msbuild]   Finished processing 0 EDMX files.
+  [msbuild] PrepareForBuild:
+  [msbuild]   Creating directory "..\..\bin\Debug\".
+  [msbuild] CoreCompile:
+  [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] CopyFilesToOutputDirectory:
+  [msbuild]   Copying file from "obj\Debug\Daemoniq.dll" to "..\..\bin\Debug\Daemoniq.dll".
+  [msbuild]   Daemoniq -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.dll
+  [msbuild]   Copying file from "obj\Debug\Daemoniq.pdb" to "..\..\bin\Debug\Daemoniq.pdb".
+  [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" (default targets).
+  [msbuild] 
+  [msbuild] Build succeeded.
+  [msbuild]     0 Warning(s)
+  [msbuild]     0 Error(s)
+  [msbuild] 
+  [msbuild] Time Elapsed 00:00:00.23
+  [msbuild] Build started 11/25/2009 1:29:41 AM.
+  [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Tests\Daemoniq.Tests.csproj" on node 0 (default targets).
+  [msbuild]   Processing 0 EDMX files.
+  [msbuild]   Finished processing 0 EDMX files.
+  [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Tests\Daemoniq.Tests.csproj" (1) is building "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" (2) on node 0 (default targets).
+  [msbuild]   Processing 0 EDMX files.
+  [msbuild]   Finished processing 0 EDMX files.
+  [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" (2) is building "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" (3) on node 0 (default targets).
+  [msbuild]   Processing 0 EDMX files.
+  [msbuild]   Finished processing 0 EDMX files.
+  [msbuild] CoreCompile:
+  [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] CopyFilesToOutputDirectory:
+  [msbuild]   Daemoniq -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.dll
+  [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" (default targets).
+  [msbuild] CoreCompile:
+  [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] _CopyAppConfigFile:
+  [msbuild]   Copying file from "App.config" to "..\..\bin\Debug\Daemoniq.Samples.exe.config".
+  [msbuild] CopyFilesToOutputDirectory:
+  [msbuild]   Copying file from "obj\Debug\Daemoniq.Samples.exe" to "..\..\bin\Debug\Daemoniq.Samples.exe".
+  [msbuild]   Daemoniq.Samples -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.Samples.exe
+  [msbuild]   Copying file from "obj\Debug\Daemoniq.Samples.pdb" to "..\..\bin\Debug\Daemoniq.Samples.pdb".
+  [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" (default targets).
+  [msbuild] CoreCompile:
+  [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] _CopyFilesMarkedCopyLocal:
+  [msbuild]   Copying file from "..\..\ext-bin\nunit\nunit.framework.dll" to "..\..\bin\Debug\nunit.framework.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\nunit\nunit.framework.xml" to "..\..\bin\Debug\nunit.framework.xml".
+  [msbuild] CopyFilesToOutputDirectory:
+  [msbuild]   Copying file from "obj\Debug\Daemoniq.Tests.dll" to "..\..\bin\Debug\Daemoniq.Tests.dll".
+  [msbuild]   Daemoniq.Tests -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.Tests.dll
+  [msbuild]   Copying file from "obj\Debug\Daemoniq.Tests.pdb" to "..\..\bin\Debug\Daemoniq.Tests.pdb".
+  [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Tests\Daemoniq.Tests.csproj" (default targets).
+  [msbuild] 
+  [msbuild] Build succeeded.
+  [msbuild]     0 Warning(s)
+  [msbuild]     0 Error(s)
+  [msbuild] 
+  [msbuild] Time Elapsed 00:00:00.62
+  [msbuild] Build started 11/25/2009 1:29:41 AM.
+  [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" on node 0 (default targets).
+  [msbuild]   Processing 0 EDMX files.
+  [msbuild]   Finished processing 0 EDMX files.
+  [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" (1) is building "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" (2) on node 0 (default targets).
+  [msbuild]   Processing 0 EDMX files.
+  [msbuild]   Finished processing 0 EDMX files.
+  [msbuild] CoreCompile:
+  [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] CopyFilesToOutputDirectory:
+  [msbuild]   Daemoniq -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.dll
+  [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" (default targets).
+  [msbuild] CoreCompile:
+  [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] _CopyAppConfigFile:
+  [msbuild] Skipping target "_CopyAppConfigFile" because all output files are up-to-date with respect to the input files.
+  [msbuild] CopyFilesToOutputDirectory:
+  [msbuild]   Daemoniq.Samples -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.Samples.exe
+  [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" (default targets).
+  [msbuild] 
+  [msbuild] Build succeeded.
+  [msbuild]     0 Warning(s)
+  [msbuild]     0 Error(s)
+  [msbuild] 
+  [msbuild] Time Elapsed 00:00:00.32
+
+package:
+
+    [mkdir] Creating directory 'X:\DotNet\Projects\daemoniq\package'.
+      [zip] Zipping 8 files to 'X:\DotNet\Projects\daemoniq\package\Daemoniq.Binaries.1.0.0.beta1.zip'.
+      [zip] Zipping 153 files to 'X:\DotNet\Projects\daemoniq\package\Daemoniq.Sources.1.0.0.beta1.zip'.
+
+full-build:
+
+
+BUILD SUCCEEDED
+
+Total time: 6.3 seconds.
+
