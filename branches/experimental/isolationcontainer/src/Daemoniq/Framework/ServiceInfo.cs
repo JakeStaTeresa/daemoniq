@@ -17,7 +17,6 @@ namespace Daemoniq.Framework
         public string ServiceName { get; set; }                
         public string DisplayName { get; set; }        
         public string Description { get; set; }
-        public bool Interactive { get; set; }
         public StartMode StartMode { get; set; }
         public ServiceRecoveryOptions RecoveryOptions { get; set; }
         public List<string> ServicesDependedOn
@@ -34,7 +33,6 @@ namespace Daemoniq.Framework
             serviceInfo.Description = serviceElement.Description;
             serviceInfo.StartMode = serviceElement.StartMode;
             serviceInfo.RecoveryOptions = ServiceRecoveryOptions.FromConfiguration(serviceElement.RecoveryOptions);
-            serviceInfo.Interactive = serviceElement.Interactive;
             return serviceInfo;
         }
     }

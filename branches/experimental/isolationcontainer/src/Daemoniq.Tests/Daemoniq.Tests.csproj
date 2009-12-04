@@ -54,6 +54,7 @@
     <Compile Include="Core\CommandFactoryTests.cs" />
     <Compile Include="Framework\ConfigurationTests.cs" />
     <Compile Include="Framework\ConfigurerTests.cs" />
+    <Compile Include="Framework\ServiceInfoTests.cs" />
     <Compile Include="Framework\ServiceRecoveryOptionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\ServiceControlHelperTests.cs" />

@@ -30,7 +30,7 @@ namespace Daemoniq.Core.Commands
             performOperation(
                 configuration,
                 commandLineArguments,
-                serviceInfo => !ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
+                serviceInfo => ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
                 serviceInfo => string.Format("Service '{0}' is already installed.", serviceInfo.DisplayName),
                 "There are  no serices to install.  Skipping install operation.",
                 displayNames => string.Format("Installing services '{0}'...", displayNames),
@@ -43,7 +43,7 @@ namespace Daemoniq.Core.Commands
                             ServiceControlHelper.SetServiceRecoveryOptions(
                                 serviceInfo.ServiceName,
                                 serviceInfo.RecoveryOptions);
-                            if (serviceInfo.Interactive)
+                            if (commandLineArguments.AllowServiceToInteractWithDesktop)
                             {
                                 ServiceControlHelper.AllowServiceToInteractWithDesktop(serviceInfo.ServiceName);
                             }
