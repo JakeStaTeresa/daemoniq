@@ -25,7 +25,6 @@ namespace Daemoniq.Tests.Framework
         public void PropertyTests()
         {
             var serviceInfo = new ServiceInfo();
-            Assert.IsNull(serviceInfo.Id); 
             Assert.IsNull(serviceInfo.ServiceName);
             Assert.IsNull(serviceInfo.DisplayName);
             Assert.IsNull(serviceInfo.Description);
@@ -34,7 +33,6 @@ namespace Daemoniq.Tests.Framework
             Assert.IsNotNull(serviceInfo.ServicesDependedOn);
             Assert.IsEmpty(serviceInfo.ServicesDependedOn);
             
-            serviceInfo.Id = "DummyId";
             serviceInfo.ServiceName = "DummyServiceName";
             serviceInfo.DisplayName = "DummyDisplayName";
             serviceInfo.Description = "DummyDescription";
@@ -43,7 +41,6 @@ namespace Daemoniq.Tests.Framework
             serviceInfo.StartMode = StartMode.Automatic;
             serviceInfo.ServicesDependedOn.Add(KnownServices.MsHttp);
 
-            Assert.AreEqual("DummyId", serviceInfo.Id);
             Assert.AreEqual("DummyServiceName", serviceInfo.ServiceName);
             Assert.AreEqual("DummyDisplayName", serviceInfo.DisplayName);
             Assert.AreEqual("DummyDescription", serviceInfo.Description);

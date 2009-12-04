@@ -48,7 +48,7 @@ namespace Daemoniq.Core.Commands
                 }
 
                 var serviceInstance =
-                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.Id);
+                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.ServiceName);
                 if (serviceInstance == null)
                 {
                     throw new InvalidOperationException(

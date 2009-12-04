@@ -194,7 +194,7 @@ namespace Daemoniq.Core.Commands
             foreach (var serviceInfo in services)
             {
                 var serviceInstance =
-                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.Id);
+                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.ServiceName);
                 if (serviceInstance == null)
                 {
                     throw new InvalidOperationException(
