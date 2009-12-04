@@ -54,13 +54,6 @@ namespace Daemoniq.Configuration
             set { base["description"] = value; }
         }
 
-        [ConfigurationProperty("interactive")]
-        public bool Interactive
-        {
-            get { return (bool)(base["interactive"]); }
-            set { base["interactive"] = value; }
-        }
-
         [ConfigurationProperty("serviceStartMode")]
         public StartMode StartMode
         {

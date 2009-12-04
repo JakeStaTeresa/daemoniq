@@ -16,7 +16,6 @@
 using Daemoniq.Core;
 using Daemoniq.Core.Commands;
 using Daemoniq.Framework;
-using Daemoniq.Samples;
 using NUnit.Framework;
 
 namespace Daemoniq.Tests.Core
@@ -27,14 +26,21 @@ namespace Daemoniq.Tests.Core
         [Test]
         public void SetAndGetRecoveryOptions()
         {            
-            ICommand installCommand = CommandFactory.CreateInstance(ConfigurationAction.Install);
-            DummyService dummyService = new DummyService();
+            ICommand installCommand = CommandFactory.CreateInstance(
+                ConfigurationAction.Install);
+            
+            var serviceInfo = new ServiceInfo();
+            serviceInfo.ServiceName = "Dummy:SRHT";
+            serviceInfo.DisplayName = "Dummy-ServiceRecoveryHelperTest";
 
+            var commandLineArguments = new CommandLineArguments();
+            commandLineArguments.AccountInfo = new AccountInfo(AccountType.LocalSystem);
+            
             var configuration = new Daemoniq.Framework.Configuration();
-            configuration.ServiceName = dummyService.ServiceName + ":SRHT";
-            configuration.DisplayName = dummyService.DisplayName + "-ServiceRecoveryHelperTest";
-            configuration.AccountInfo = new AccountInfo(AccountType.LocalSystem);                          
-            installCommand.Execute(configuration, new DummyService());
+            
+            installCommand.Execute(
+                configuration, 
+                commandLineArguments);
         
             var expected = new ServiceRecoveryOptions();
             expected.FirstFailureAction = ServiceRecoveryAction.RunAProgram;
@@ -45,13 +51,13 @@ namespace Daemoniq.Tests.Core
             expected.CommandToLaunchOnFailure = "Sample.exe";
             expected.RebootMessage = "OMGWTFBBQ!!!!";
             
-            ServiceControlHelper.SetServiceRecoveryOptions(configuration.ServiceName, expected);            
-            var actual = ServiceControlHelper.GetServiceRecoveryOptions(configuration.ServiceName);
+            ServiceControlHelper.SetServiceRecoveryOptions(serviceInfo.ServiceName, expected);
+            var actual = ServiceControlHelper.GetServiceRecoveryOptions(serviceInfo.ServiceName);
 
             Assert.AreEqual(expected, actual);
 
             ICommand uninstallCommand = CommandFactory.CreateInstance(ConfigurationAction.Uninstall);            
-            uninstallCommand.Execute(configuration, dummyService);
+            uninstallCommand.Execute(configuration, commandLineArguments);
         }
     }
 }
