@@ -14,37 +14,17 @@
  *  limitations under the License.
  */
 using System.Configuration;
-using Daemoniq.Framework;
 
 namespace Daemoniq.Configuration
 {
     public class DaemoniqConfigurationSection : 
         ConfigurationSection
     {
-        public DaemoniqConfigurationSection()
-        {
-            ServiceStartMode = StartMode.Manual;            
-        }
-
-        [ConfigurationProperty("serviceStartMode")]
-        public StartMode ServiceStartMode
-        {
-            get { return (StartMode)(base["serviceStartMode"]); }
-            set { base["serviceStartMode"] = value; }
-        }
-
-        [ConfigurationProperty("recoveryOptions")]
-        public RecoveryOptionsElement RecoveryOptions
-        {
-            get { return (RecoveryOptionsElement)this["recoveryOptions"]; }
-            set { this["recoveryOptions"] = value; }
-        }
-
-        [ConfigurationProperty("servicesDependedOn",
+        [ConfigurationProperty("services",
            IsDefaultCollection = true, IsRequired = false)]
-        public ServiceElementCollection ServicesDependedOn
+        public ServiceElementCollection Services
         {
-            get { return (ServiceElementCollection)this["servicesDependedOn"]; }
+            get { return (ServiceElementCollection)this["services"]; }
         }
     }
 }

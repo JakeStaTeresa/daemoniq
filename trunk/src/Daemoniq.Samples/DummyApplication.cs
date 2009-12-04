@@ -13,15 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using Castle.Windsor;
+using Castle.Windsor.Configuration.Interpreters;
+using CommonServiceLocator.WindsorAdapter;
 using Daemoniq.Framework;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Samples
 {
-    class DummyApplication
+    public class DummyApplication
     {
         public static void Main(string[] args)
         {
-            new ServiceApplication<DummyService>().Run(args);
-        }        
+            ServiceLocator.SetLocatorProvider(createWindsorContainer);
+            new ServiceApplication().Run(args);
+        }
+
+        private static WindsorServiceLocator createWindsorContainer()
+        {
+            return new WindsorServiceLocator(new WindsorContainer(new XmlInterpreter()));
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  Copyright 2009 Kriztian Jake Sta. Teresa
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,21 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using System.Collections.Generic;
+using Daemoniq.Framework;
+using NUnit.Framework;
 
-namespace Daemoniq.Framework
+namespace Daemoniq.Tests.Core
 {
-    public class Configuration:IConfiguration
+    [TestFixture]
+    public class RunCommandTests : CommandTestBase
     {
-        private readonly List<ServiceInfo> services = new List<ServiceInfo>();
-
-        #region IConfiguration Members
-
-        public List<ServiceInfo> Services
+        public RunCommandTests()
         {
-            get { return services; }
+            Action = ConfigurationAction.Run;
         }
-
-        #endregion
     }
 }
