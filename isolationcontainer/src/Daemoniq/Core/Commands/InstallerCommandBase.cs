@@ -21,15 +21,17 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
-    abstract class InstallerCommandBase : CommandBase        
+    abstract class InstallerCommandBase : ICommand        
     {
         public void Install(
             IConfiguration configuration,
-            CommandLineArguments commandLineArguments)
+            CommandLineArguments commandLineArguments,
+            string assemblyPath)
         {
             performOperation(
                 configuration,
                 commandLineArguments,
+                assemblyPath,
                 serviceInfo => ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
                 serviceInfo => string.Format("Service '{0}' is already installed.", serviceInfo.DisplayName),
                 "There are  no serices to install.  Skipping install operation.",
@@ -53,11 +55,13 @@ namespace Daemoniq.Core.Commands
 
         public void Uninstall(
             IConfiguration configuration,
-            CommandLineArguments commandLineArguments)
+            CommandLineArguments commandLineArguments,
+            string assemblyPath)
         {
             performOperation(
                 configuration,
                 commandLineArguments,
+                assemblyPath,
                 serviceInfo => !ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
                 serviceInfo => string.Format("Service '{0}' is not yet installed.", serviceInfo.DisplayName),
                 "There are  no serices to uninstall.  Skipping uninstall operation.",
@@ -65,11 +69,16 @@ namespace Daemoniq.Core.Commands
                 installer => installer.Uninstall(),
                 displayNames => string.Format("Services '{0}' successfully uninstalled.", displayNames),
                 services => { });
-        }        
+        }
+
+        public abstract void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments); 
 
         private void performOperation(
             IConfiguration configuration,
             CommandLineArguments commandLineArguments,
+            string assemblyPath,
             Predicate<ServiceInfo> exclusionFilter,
             Converter<ServiceInfo, string> exclusionMessageConverter,
             string cancelMessage,
@@ -80,6 +89,7 @@ namespace Daemoniq.Core.Commands
         {
             LogHelper.EnterFunction(configuration, 
                 commandLineArguments,
+                assemblyPath,
                 exclusionFilter,
                 exclusionMessageConverter,
                 preOperationMessageConverter,
@@ -89,6 +99,7 @@ namespace Daemoniq.Core.Commands
                 postOperationAction);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
             ThrowHelper.ThrowArgumentNullIfNull(exclusionFilter, "exclusionFilter");
             ThrowHelper.ThrowArgumentNullIfNull(exclusionMessageConverter, "exclusionMessageConverter");
             ThrowHelper.ThrowArgumentNullIfNull(cancelMessage, "cancelMessage");
@@ -97,44 +108,46 @@ namespace Daemoniq.Core.Commands
             ThrowHelper.ThrowArgumentNullIfNull(postOperationMessageConverter, "postOperationMessageConverter");
             ThrowHelper.ThrowArgumentNullIfNull(postOperationAction, "postOperationAction");
 
-            var servicesToInstall =
+            var services =
                 getServicesToPerformActionOn(configuration,
                                               exclusionFilter,
                                               exclusionMessageConverter);
 
-            if (servicesToInstall.Count == 0)
+            if (services.Count == 0)
             {
                 LogHelper.WriteLine(cancelMessage);
                 Console.WriteLine(cancelMessage);
                 return;
             }
 
-            checkServicesInContainer(servicesToInstall);
+            checkServicesInContainer(services);
             
             try
             {
-                string displayNamesToInstall =
+                string displayNames =
                     string.Join("','", 
-                        Array.ConvertAll(servicesToInstall.ToArray(),
+                        Array.ConvertAll(services.ToArray(),
                                          s => s.DisplayName));
-                string preOperationMessage = preOperationMessageConverter(displayNamesToInstall);
+                string preOperationMessage = preOperationMessageConverter(displayNames);
                 LogHelper.WriteLine(preOperationMessage);
                 Console.WriteLine(preOperationMessage);
                 using(var installer = new WindowsServiceInstaller(
-                    servicesToInstall,
-                    commandLineArguments))
+                    services,
+                    commandLineArguments,
+                    assemblyPath))
                 {
                     operationAction(installer);
                 }
-                string postOperationMessage = postOperationMessageConverter(displayNamesToInstall);
+                string postOperationMessage = postOperationMessageConverter(displayNames);
                 LogHelper.WriteLine(postOperationMessage);
                 Console.WriteLine(postOperationMessage);
 
-                postOperationAction(servicesToInstall);
+                postOperationAction(services);
             }
             catch (Exception e)
             {                    
                 LogHelper.Error(e);
+                throw;
             }
             LogHelper.LeaveFunction();
         }
@@ -163,7 +176,16 @@ namespace Daemoniq.Core.Commands
         private void checkServicesInContainer(
             IEnumerable<ServiceInfo> services)
         {
-            var serviceLocator = ServiceLocator.Current;
+            var serviceLocator = default(IServiceLocator);
+            try
+            {
+                serviceLocator = ServiceLocator.Current;
+            }
+            catch (Exception e)
+            {
+                LogHelper.Error(e);
+            }
+
             if (serviceLocator == null)
             {
                 throw new InvalidOperationException("An error occured while getting service locator.");

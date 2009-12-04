@@ -95,8 +95,5 @@ namespace Daemoniq.Tests.Framework
         {
             new AccountInfo("Jake.StaTeresa", "");
         }
-
-
-
     }
 }

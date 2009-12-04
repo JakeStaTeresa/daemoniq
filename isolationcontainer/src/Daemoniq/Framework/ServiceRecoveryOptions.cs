@@ -109,6 +109,7 @@ namespace Daemoniq.Framework
             recoveryOptions.CommandToLaunchOnFailure = recoveryOptionsElement.CommandToLaunchOnFailure;
             recoveryOptions.MinutesToRestartService = recoveryOptionsElement.MinutesToRestartService;
             recoveryOptions.RebootMessage = recoveryOptionsElement.RebootMessage;
+            recoveryOptions.Validate();
             return recoveryOptions;
         }
     }

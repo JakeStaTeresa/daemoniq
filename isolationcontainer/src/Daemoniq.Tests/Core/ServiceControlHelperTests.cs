@@ -16,6 +16,9 @@
 using Daemoniq.Core;
 using Daemoniq.Core.Commands;
 using Daemoniq.Framework;
+using Daemoniq.Samples;
+using Microsoft.Practices.ServiceLocation;
+using Moq;
 using NUnit.Framework;
 
 namespace Daemoniq.Tests.Core
@@ -23,25 +26,60 @@ namespace Daemoniq.Tests.Core
     [TestFixture]
     public class ServiceControlHelperTests
     {
-        [Test]
-        public void SetAndGetRecoveryOptions()
-        {            
-            ICommand installCommand = CommandFactory.CreateInstance(
+        private IConfiguration configuration;
+        private CommandLineArguments commandLineArguments;
+        private string assemblyLocation;
+
+        [TestFixtureSetUp]
+        public void TestFixtureSetup()
+        {
+            assemblyLocation = typeof(DummyService).Assembly.Location;
+            var mock = new Mock<IServiceLocator>();
+            mock.Setup(s => s.GetInstance<IServiceInstance>("Dummy:SRHT"))
+                .Returns(() => new DummyService());
+
+            ServiceLocator.SetLocatorProvider(
+                () => mock.Object);
+
+            ICommand command = CommandFactory.CreateInstance(
                 ConfigurationAction.Install);
-            
+
             var serviceInfo = new ServiceInfo();
+            serviceInfo.Id = "Dummy:SRHT";
             serviceInfo.ServiceName = "Dummy:SRHT";
             serviceInfo.DisplayName = "Dummy-ServiceRecoveryHelperTest";
 
-            var commandLineArguments = new CommandLineArguments();
+            commandLineArguments = new CommandLineArguments();
             commandLineArguments.AccountInfo = new AccountInfo(AccountType.LocalSystem);
-            
-            var configuration = new Daemoniq.Framework.Configuration();
-            
+
+            configuration = new Daemoniq.Framework.Configuration();
+            configuration.Services.Add(serviceInfo);
+
+            var installCommand = (command as InstallCommand);
+            // ReSharper disable PossibleNullReferenceException
             installCommand.Execute(
-                configuration, 
-                commandLineArguments);
-        
+                configuration,
+                commandLineArguments,
+                assemblyLocation);
+            // ReSharper restore PossibleNullReferenceException
+        }
+
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+            var command = CommandFactory.CreateInstance(ConfigurationAction.Uninstall);
+            var uninstallCommand = command as UninstallCommand;
+            // ReSharper disable PossibleNullReferenceException
+            uninstallCommand.Execute(
+                configuration,
+                commandLineArguments,
+                assemblyLocation);
+            // ReSharper restore PossibleNullReferenceException
+        }
+
+        [Test]
+        public void SetAndGetRecoveryOptions()
+        {
             var expected = new ServiceRecoveryOptions();
             expected.FirstFailureAction = ServiceRecoveryAction.RunAProgram;
             expected.SecondFailureAction = ServiceRecoveryAction.RestartTheService;
@@ -50,14 +88,12 @@ namespace Daemoniq.Tests.Core
             expected.DaysToResetFailAcount = 2;
             expected.CommandToLaunchOnFailure = "Sample.exe";
             expected.RebootMessage = "OMGWTFBBQ!!!!";
-            
+
+            var serviceInfo = configuration.Services[0];
             ServiceControlHelper.SetServiceRecoveryOptions(serviceInfo.ServiceName, expected);
             var actual = ServiceControlHelper.GetServiceRecoveryOptions(serviceInfo.ServiceName);
 
             Assert.AreEqual(expected, actual);
-
-            ICommand uninstallCommand = CommandFactory.CreateInstance(ConfigurationAction.Uninstall);            
-            uninstallCommand.Execute(configuration, commandLineArguments);
         }
     }
 }

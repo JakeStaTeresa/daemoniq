@@ -13,19 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using Daemoniq.Framework;
 using NUnit.Framework;
 
-namespace Daemoniq.Tests.Framework
+namespace Daemoniq.Tests.Core
 {
     [TestFixture]
-    public class ConfigurationTests
+    public class InstallCommandTests:CommandTestBase
     {
-        [Test]
-        public void DefaultPropertyTest()
+        public InstallCommandTests()
         {
-            var configuration = new Daemoniq.Framework.Configuration();
-            Assert.IsNotNull(configuration.Services);
-            Assert.AreEqual(0, configuration.Services.Count);
+            Action = ConfigurationAction.Install;
         }
     }
 }

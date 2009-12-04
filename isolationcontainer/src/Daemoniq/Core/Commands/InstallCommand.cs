@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using System.Reflection;
 using Daemoniq.Framework;
 
 namespace Daemoniq.Core.Commands
@@ -23,10 +24,23 @@ namespace Daemoniq.Core.Commands
             IConfiguration configuration,
             CommandLineArguments commandLineArguments)
         {
+            Assembly entryAssembly = Assembly.GetEntryAssembly();
+            ThrowHelper.ThrowInvalidOperationExceptionIf(
+                a => a == null, entryAssembly,
+                "Unable to get entry assembly.");
+            Execute(configuration, commandLineArguments, entryAssembly.Location);
+        }
+
+        public void Execute(
+            IConfiguration configuration,
+            CommandLineArguments commandLineArguments,
+            string assemblyPath)
+        {
             LogHelper.EnterFunction(configuration, commandLineArguments);
-            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configurationSection");
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
-            Install(configuration, commandLineArguments);
+
+            Install(configuration, commandLineArguments, assemblyPath);
             LogHelper.LeaveFunction();
         }
     }

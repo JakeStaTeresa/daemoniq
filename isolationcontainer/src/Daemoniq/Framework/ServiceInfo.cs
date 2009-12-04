@@ -11,6 +11,7 @@ namespace Daemoniq.Framework
         {
             StartMode = StartMode.Manual;
             servicesDependedOn = new List<string>();
+            RecoveryOptions = new ServiceRecoveryOptions();
         }
 
         public string Id { get; set; }
