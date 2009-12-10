@@ -1,0 +1,5 @@
+#summary Run multiple windows services in one process
+
+= Hosting Multiple Windows Services in One Process =
+
+Daemoniq allows users to run multiple services in one process. This can be done by registering two services in the IOC container and registering two service definitions in the app.config.
