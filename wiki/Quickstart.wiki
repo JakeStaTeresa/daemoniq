@@ -1,7 +1,7 @@
-#summary A quickstart guide on how to develop daemoniq windows service applications.
+#summary A Quickstart Guide to Developing Daemoniq Applications
 #labels Phase-Implementation,Featured
 
-= A Quickstart Guide to Developing Daemoniq Applications=
+= A Quickstart Guide to Developing Daemoniq Applications =
 
 == Getting Started ==
 
