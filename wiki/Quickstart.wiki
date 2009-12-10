@@ -7,7 +7,7 @@ Download the source code or binaries from the *[http://code.google.com/p/daemoni
 
 Daemoniq uses the [http://commonservicelocator.codeplex.com/ Common Service Locator] from Microsoft Patterns and Practices to locate the different service instances. In this example, we will use the [http://commonservicelocator.codeplex.com/wikipage?title=Castle%20Windsor%20Adapter&referringTitle=Home Castle Windsor Adapter] to setup our project. Because of this you will need to download the binaries for these projects.
 
-Once you get your hands on the necessary binaries, you can create a console application project in your favorite ide. Add a reference to  Daemoniq.dll in this project. Also please add a reference to the binaries from [http://commonservicelocator.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=44827 CommonServiceLocator.WindsorAdapter] and [http://commonservicelocator.codeplex.com/Release/ProjectReleases.aspx?ReleaseId=17694 Microsoft.Patterns.ServiceLocation].
+Once you get your hands on the necessary binaries, you can create a console application project named `DummyApplication` in your favorite ide. Add a reference to  Daemoniq.dll in this project. Also please add a reference to the binaries from [http://commonservicelocator.codeplex.com/Project/Download/FileDownload.aspx?DownloadId=44827 CommonServiceLocator.WindsorAdapter] and [http://commonservicelocator.codeplex.com/Release/ProjectReleases.aspx?ReleaseId=17694 Microsoft.Patterns.ServiceLocation].
 
 _Note: you don't need to have a reference to System.ServiceProcess to create windows services in Daemoniq._
 
