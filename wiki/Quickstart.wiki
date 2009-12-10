@@ -87,6 +87,7 @@ namespace Daemoniq.Samples
 Below is a sample code that:
   * registers the component to the `WindsorContainer`
   * refer to the component in the service definitions section of the `DaemoniqConfigurationSection`.
+  * specify the serviceName, displayName and description of the service. These parameters will appear in the services.msc applet.
 
 _Note that serviceName and component id should be identical in order for Daemoniq to locate the services successfully_
 
@@ -122,4 +123,8 @@ That's it! We can now compile our project and try to install/uninstall and/or de
 
 == Installing/Uninstalling/Debugging the Service ==
 
-To install the service type the following from the command line: 
+To install the service, from the command line, enter `DummyApplication.exe /action=install`. The service will be installed uwing the 'localSystem' credentials. To more about the different credential types you can use, enter `DummyApplication.exe /help` or just enter `DummyApplication.exe` without any parameters.
+
+To uninstall the service from the command line, enter `DummyApplication.exe /action=uninstall`
+
+To debug the service from the command line, enter `DummyApplication.exe /action=debug`
