@@ -5,7 +5,7 @@
 
 Daemoniq supports for setting up service recovery options via the app.config file. This is enabled by adding a recoveryOptions element inside the service definition. The attributes exposed by this element allows users to set recovery options at the same level of abstraction as the Recovery tab of the Service Properties window of the services.msc applet.
 
-[http://daemoniq.org http://technet.microsoft.com/en-us/library/Cc749870.exch0304_big(en-us,TechNet.10).gif]
+[http://daemoniq.org http://technet.microsoft.com/en-us/library/Cc749870.exch0305_big(en-us,TechNet.10).gif]
 
 The sample configuration file below illustrates this feature.
 
