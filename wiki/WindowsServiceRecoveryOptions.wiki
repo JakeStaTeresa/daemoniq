@@ -10,7 +10,7 @@ Daemoniq supports for setting up service recovery options via the app.config fil
 The sample configuration file below illustrates this feature.
 
 {{{
-?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
   <configSections>
     <section name="daemoniq" type="Daemoniq.Configuration.DaemoniqConfigurationSection, Daemoniq" />
