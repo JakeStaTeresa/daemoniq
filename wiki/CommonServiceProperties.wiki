@@ -35,4 +35,4 @@ The sample configuration file below illustrates hosting 2 instances of the same 
 </configuration>
 }}}
 
-_Note: acceptable values for `serviceStartMode` are `automatic`, `manual` and `disabled`._
+_Note: acceptable values for `serviceStartMode` are `Automatic`, `Manual` and `Disabled`._
