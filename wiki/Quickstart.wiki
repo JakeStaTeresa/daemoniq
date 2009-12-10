@@ -119,13 +119,13 @@ _Note that serviceName and component id should be identical in order for Daemoni
 </configuration>
 }}}
 
-That's it! We can now compile our project and try to install/uninstall and/or debugging it.
+That's it! We can now compile our project and try to install/uninstall and/or debug it.
 
 == Installing the Service ==
 
 To install the service, from the command line, enter `DummyApplication.exe /action=install`. 
 
-The service will be installed uwing the 'localSystem' credentials. To know more about the different credential types you can use, enter `DummyApplication.exe /help` or just enter `DummyApplication.exe` without any parameters.
+By default, the service will be installed using the 'localSystem' credentials. To know more about the different credential types you can use, enter `DummyApplication.exe /help` or just enter `DummyApplication.exe` without any parameters.
 
 == Uninstalling the Service ==
 
