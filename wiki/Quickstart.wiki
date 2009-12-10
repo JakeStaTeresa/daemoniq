@@ -125,9 +125,15 @@ To install the service, from the command line, enter `DummyApplication.exe /acti
 
 By default, the service will be installed using the 'localSystem' credentials. To know more about the different credential types you can use, enter `DummyApplication.exe /help` or just enter `DummyApplication.exe` without any parameters.
 
+Specifying this command-line argument/s causes your application to be registered in the services.msc applet.
+
 = Uninstalling the Service =
 
 To uninstall the service from the command line, enter `DummyApplication.exe /action=uninstall`
 
+Specifying this command-line argument/s causes your application to be removed from the services.msc applet.
+
 = Debugging the Service =
 To debug the service from the command line, enter `DummyApplication.exe /action=debug`
+
+Specifying this command-line argument/s launches your application as a console application.
