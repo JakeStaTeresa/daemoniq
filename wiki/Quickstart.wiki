@@ -1,9 +1,7 @@
 #summary A Quickstart Guide to Developing Daemoniq Applications
 #labels Phase-Implementation,Featured
 
-= A Quickstart Guide to Developing Daemoniq Applications =
-
-== Getting Started ==
+= Getting Started =
 
 Download the source code or binaries from the *[http://code.google.com/p/daemoniq/downloads/list downloads]* page. When compiling from source code, the build scripts are located in the build/scripts/ directory. There you will find several batch files and a nant.build file. Execute full-build.bat to fully compile Daemoniq.
 
@@ -13,7 +11,7 @@ Once you get your hands on the necessary binaries, you can create a console appl
 
 _Note: you don't need to have a reference to System.ServiceProcess to create windows services in Daemoniq._
 
-== Implementing the Service ==
+= Implementing the Service =
 
 For illustration purposes, we will create a service that launches a thread when started and waits for a stop signal in the secondary thread. When stopped, the service will send the stop signal to the secondary thread which will cause it to stop waiting and exit. We will call this service _DummyService_.
 
@@ -50,7 +48,7 @@ namespace Daemoniq.Samples
 }
 }}} 
 
-== Initializing the Service Application ==
+= Initializing the Service Application =
 
 Now that we have the necessary references, make sure to call `ServiceLocator.SetLocatorProvider` method and pass in a delegate to a method which returns the `WindsorServiceLocator`. 
 
@@ -82,7 +80,7 @@ namespace Daemoniq.Samples
 }
 }}}
 
-== Configuring the Service ==
+= Configuring the Service =
 
 Below is a sample code that:
   * registers the component to the `WindsorContainer`
@@ -121,15 +119,15 @@ _Note that serviceName and component id should be identical in order for Daemoni
 
 That's it! We can now compile our project and try to install/uninstall and/or debug it.
 
-== Installing the Service ==
+= Installing the Service =
 
 To install the service, from the command line, enter `DummyApplication.exe /action=install`. 
 
 By default, the service will be installed using the 'localSystem' credentials. To know more about the different credential types you can use, enter `DummyApplication.exe /help` or just enter `DummyApplication.exe` without any parameters.
 
-== Uninstalling the Service ==
+= Uninstalling the Service =
 
 To uninstall the service from the command line, enter `DummyApplication.exe /action=uninstall`
 
-== Debugging the Service ==
+= Debugging the Service =
 To debug the service from the command line, enter `DummyApplication.exe /action=debug`
