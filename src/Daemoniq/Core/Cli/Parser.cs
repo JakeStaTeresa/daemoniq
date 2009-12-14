@@ -157,8 +157,7 @@ namespace Daemoniq.Core.Cli
 
         public ParseResult Parse(string[] args)
         {
-            Console.WriteLine(HeaderText);
-
+            
             Dictionary<string, ArgumentInfo> argumentMap = 
                 createArgumentMap();
 
@@ -293,6 +292,14 @@ namespace Daemoniq.Core.Cli
 
                 string[] kv = argument.Split(new[] { configuration.KeyValueSeparator },
                                              StringSplitOptions.RemoveEmptyEntries);
+
+                if(kv.Length == 1 &&
+                    argument.EndsWith(configuration.KeyValueSeparator))
+                {
+                    parseResult.Errors.Add(string.Format("Argument '{0}' does not have a value.",
+                                                  kv[0]));
+                    continue;                                       
+                }
 
                 string argumentName = kv[0];
                 string argumentValue = kv[1];

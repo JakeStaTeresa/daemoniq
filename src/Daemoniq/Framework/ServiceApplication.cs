@@ -37,6 +37,7 @@ namespace Daemoniq.Framework
             var commandLineArguments = new CommandLineArguments();
             Parser parser = initializeParser(commandLineArguments);
             bool runningAsService = isRunningAsService();
+            bool interactive = false;
             if (runningAsService)
             {
                 string runArgument = string.Format("{0}action{1}run",
@@ -44,24 +45,76 @@ namespace Daemoniq.Framework
                                                    parser.Configuration.KeyValueSeparator);
                 arguments = new[] { runArgument };
             }
+            else
+            {
+                interactive = arguments.Length == 0;
+            }
 
-            var parseResult = parser.Parse(arguments);
-            if (parseResult.ShowHelp)
+            Console.WriteLine(parser.HeaderText);
+            if(interactive)
             {
                 parser.ShowHelp();
-                return;
             }
-            
-            if(parseResult.HasErrors)
+
+            ParseResult parseResult;
+            do
             {
-                parser.ShowErrors(parseResult);
-                return;
-            }       
+                if (interactive)
+                {
+                    arguments = promptForArguments();
+                }
+
+                if(arguments.Length == 1 &&
+                       arguments[0].ToLower() == "exit")
+                {
+                    return;
+                }
+
+                parseResult = parser.Parse(arguments);
+                if (parseResult.ShowHelp)
+                {
+                    parser.ShowHelp();
+                    if (!interactive)
+                    {
+                        return;
+                    }
+                }
+
+                if (parseResult.HasErrors)
+                {
+                    parser.ShowErrors(parseResult);
+                    if (!interactive)
+                    {
+                        return;
+                    }
+                }  
+            } while (interactive &&
+                (parseResult.ShowHelp || 
+                parseResult.HasErrors));
 
             IConfiguration configuration =  Configurer.Configure();
             var command = CommandFactory.CreateInstance(commandLineArguments.Action);
             command.Execute(configuration, commandLineArguments);
+
+            if(interactive)
+            {
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey(true);
+            }
             LogHelper.LeaveFunction();
+        }
+
+        private string[] promptForArguments()
+        {
+            Console.Write(">> ");
+            var input = Console.ReadLine();
+            var returnValue = new string[]{};
+            if(!string.IsNullOrEmpty(input))
+            {
+                returnValue = input.Split(new[] {" "},
+                                          StringSplitOptions.RemoveEmptyEntries);
+            }
+            return returnValue;
         }
 
         private Parser initializeParser(
