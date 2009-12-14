@@ -13,23 +13,36 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using System;
 using System.ServiceProcess;
-
-using Daemoniq.Framework;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core
 {
-    class WindowsServiceBase:ServiceBase        
+    public class WindowsServiceBase:ServiceBase        
     {
         private readonly IServiceInstance serviceInstance;
 
-        public WindowsServiceBase(string serviceName,
-            IServiceInstance serviceInstance)
+        public WindowsServiceBase(string serviceName)
         {
-            ThrowHelper.ThrowArgumentNullIfNull(serviceInstance, "serviceInstance");
+            ThrowHelper.ThrowArgumentNullIfNull(serviceName, "serviceName");
             ServiceName = serviceName;
-            
-            this.serviceInstance = serviceInstance;            
+
+            var serviceLocator = ServiceLocator.Current;
+            if (serviceLocator == null)
+            {
+                throw new InvalidOperationException("An error occured while getting service locator.");
+            }
+
+            var tempServiceInstance =
+                    serviceLocator.GetInstance<IServiceInstance>(serviceName);
+            if (tempServiceInstance == null)
+            {
+                throw new InvalidOperationException(
+                    string.Format("An error located while resolving service instance '{0}'. ", serviceName));
+            }
+
+            serviceInstance = tempServiceInstance;            
         }                        
 
         protected override void OnStart(string[] args)

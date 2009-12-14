@@ -15,7 +15,7 @@
  */
 namespace Daemoniq.Core.Cli
 {
-    class Configuration
+    public class Configuration
     {
         private static Configuration defaultConfiguration = 
             new Configuration{

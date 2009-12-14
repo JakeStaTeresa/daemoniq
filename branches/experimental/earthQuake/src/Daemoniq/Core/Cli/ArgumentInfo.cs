@@ -17,31 +17,36 @@ using System.Text;
 
 namespace Daemoniq.Core.Cli
 {
-    class ArgumentInfo
+    public class ArgumentInfo
     {
-        private readonly Configuration configuration;
+        private readonly ArgumentFormat argumentFormat;
         
         public string ShortArgument { get; set; }
-        public string LongArgument { get; set; }
+        public string LongArgument { get; private set; }
         public string Description { get; set; } 
         public bool Required { get; set; }
         public ArgumentType Type { get; set; }
         public string DefaultValue { get; set; }
-        public string[] AcceptedValues { get; set; }
-        
-        public ArgumentInfo()
-            :this(Configuration.Default)
-        {            
+        public string[] AcceptedValues { get; set; }               
+
+        public ArgumentInfo(
+            string longArgument,
+            ArgumentFormat argumentFormat)
+        {
+            LogHelper.EnterFunction(longArgument, argumentFormat);
+            ThrowHelper.ThrowArgumentNullIfNull(longArgument, "longArgument");
+            ThrowHelper.ThrowArgumentOutOfRangeIfEmpty(longArgument, "longArgument");
+            ThrowHelper.ThrowArgumentNullIfNull(argumentFormat, "argumentFormat");
+
+            LongArgument = longArgument;
+            this.argumentFormat = argumentFormat;
+
+            LogHelper.LeaveFunction();
         }
 
-        public ArgumentInfo(Configuration configuration)
+        public ArgumentFormat Format
         {
-            this.configuration = configuration; 
-        }
-
-        public Configuration Configuration
-        {
-            get { return configuration; }
+            get { return argumentFormat; }
         } 
 
         public override string ToString()
@@ -52,19 +57,25 @@ namespace Daemoniq.Core.Cli
                 stringBuilder.Append("[");
             }
             stringBuilder.AppendFormat("{0}{1}",
-                Configuration.ArgumentPrefix,
+                Format.LongArgumentPrefix,
                 LongArgument);
             if (!string.IsNullOrEmpty(ShortArgument))
             {
                 stringBuilder.AppendFormat("|{0}{1}",
-                    Configuration.ArgumentPrefix,
+                    Format.ShortArgumentPrefix,
                     ShortArgument);
             }
 
-            if (Type != ArgumentType.Flag)
+            if (Type == ArgumentType.Normal)
             {
                 stringBuilder.AppendFormat("{0}{1}",
-                    Configuration.KeyValueSeparator, "value");
+                    Format.KeyValueSeparator, "value");
+            }
+
+            if (Type == ArgumentType.Password)
+            {
+                stringBuilder.AppendFormat("[{0}{1}]",
+                    Format.KeyValueSeparator, "value");
             }
 
             if (!Required)

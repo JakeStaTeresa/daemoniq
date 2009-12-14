@@ -14,39 +14,34 @@
  *  limitations under the License.
  */
 using System.Reflection;
-using Daemoniq.Framework;
 
 namespace Daemoniq.Core.Commands
 {
-    class UninstallCommand : InstallerCommandBase        
+    public class UninstallCommand : InstallerCommandBase        
     {
         public override void Execute(
-            IConfiguration configuration,
-            CommandLineArguments commandLineArguments)
+            IConfiguration configuration)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
+            LogHelper.EnterFunction(configuration);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
 
             Assembly entryAssembly = Assembly.GetEntryAssembly();
             ThrowHelper.ThrowInvalidOperationExceptionIf(
                 a => a == null, entryAssembly,
                 "Unable to get entry assembly.");
-            Execute(configuration, commandLineArguments, entryAssembly.Location);
+            Execute(configuration, entryAssembly.Location);
             LogHelper.LeaveFunction();
         }
 
         public void Execute(
             IConfiguration configuration,
-            CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments, assemblyPath);
+            LogHelper.EnterFunction(configuration, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
 
-            Uninstall(configuration, commandLineArguments, assemblyPath);
+            Uninstall(configuration, assemblyPath);
             LogHelper.LeaveFunction();
         }
     }

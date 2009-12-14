@@ -17,7 +17,7 @@ using System;
 
 namespace Daemoniq.Core
 {
-    static class ThrowHelper
+    public static class ThrowHelper
     {
         public static void ThrowArgumentNullIfNull(object o, string paramName)
         {

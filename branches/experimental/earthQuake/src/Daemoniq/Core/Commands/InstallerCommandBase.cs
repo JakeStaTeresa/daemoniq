@@ -15,22 +15,18 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Daemoniq.Framework;
 using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
-    abstract class InstallerCommandBase : ICommand        
+    public abstract class InstallerCommandBase : ICommand        
     {
         public void Install(
             IConfiguration configuration,
-            CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
             performOperation(
                 configuration,
-                commandLineArguments,
                 assemblyPath,
                 serviceInfo => ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
                 serviceInfo => string.Format("Service '{0}' is already installed.", serviceInfo.DisplayName),
@@ -45,7 +41,7 @@ namespace Daemoniq.Core.Commands
                             ServiceControlHelper.SetServiceRecoveryOptions(
                                 serviceInfo.ServiceName,
                                 serviceInfo.RecoveryOptions);
-                            if (commandLineArguments.AllowServiceToInteractWithDesktop)
+                            if (configuration.AllowServiceToInteractWithDesktop)
                             {
                                 ServiceControlHelper.AllowServiceToInteractWithDesktop(serviceInfo.ServiceName);
                             }
@@ -55,12 +51,10 @@ namespace Daemoniq.Core.Commands
 
         public void Uninstall(
             IConfiguration configuration,
-            CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
             performOperation(
                 configuration,
-                commandLineArguments,
                 assemblyPath,
                 serviceInfo => !ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName),
                 serviceInfo => string.Format("Service '{0}' is not yet installed.", serviceInfo.DisplayName),
@@ -72,12 +66,10 @@ namespace Daemoniq.Core.Commands
         }
 
         public abstract void Execute(
-            IConfiguration configuration,
-            CommandLineArguments commandLineArguments); 
+            IConfiguration configuration); 
 
         private void performOperation(
             IConfiguration configuration,
-            CommandLineArguments commandLineArguments,
             string assemblyPath,
             Predicate<ServiceInfo> exclusionFilter,
             Converter<ServiceInfo, string> exclusionMessageConverter,
@@ -88,7 +80,6 @@ namespace Daemoniq.Core.Commands
             Action<IEnumerable<ServiceInfo>> postOperationAction)
         {
             LogHelper.EnterFunction(configuration, 
-                commandLineArguments,
                 assemblyPath,
                 exclusionFilter,
                 exclusionMessageConverter,
@@ -98,7 +89,6 @@ namespace Daemoniq.Core.Commands
                 postOperationMessageConverter,
                 postOperationAction);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
             ThrowHelper.ThrowArgumentNullIfNull(exclusionFilter, "exclusionFilter");
             ThrowHelper.ThrowArgumentNullIfNull(exclusionMessageConverter, "exclusionMessageConverter");
@@ -133,7 +123,7 @@ namespace Daemoniq.Core.Commands
                 Console.WriteLine(preOperationMessage);
                 using(var installer = new WindowsServiceInstaller(
                     services,
-                    commandLineArguments,
+                    configuration,
                     assemblyPath))
                 {
                     operationAction(installer);
@@ -152,7 +142,7 @@ namespace Daemoniq.Core.Commands
             LogHelper.LeaveFunction();
         }
 
-        private IList<ServiceInfo> getServicesToPerformActionOn(
+        private List<ServiceInfo> getServicesToPerformActionOn(
             IConfiguration configuration,
             Predicate<ServiceInfo> predicate,
             Converter<ServiceInfo, string> converter)
@@ -170,7 +160,7 @@ namespace Daemoniq.Core.Commands
 
                 servicesToPerformActionsOn.Add(serviceInfo);
             }
-            return servicesToPerformActionsOn.AsReadOnly();
+            return servicesToPerformActionsOn;
         }
 
         private void checkServicesInContainer(

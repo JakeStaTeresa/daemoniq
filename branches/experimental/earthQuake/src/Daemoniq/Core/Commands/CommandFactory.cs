@@ -13,28 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-using Daemoniq.Framework;
-
 namespace Daemoniq.Core.Commands
 {
-    class CommandFactory
+    public class CommandFactory
     {
-        public static ICommand CreateInstance(ConfigurationAction action)
+        public static ICommand CreateInstance(ServiceAction action)
         {
             LogHelper.EnterFunction(action);
             var command = default(ICommand);
             switch (action)
             {
-                case ConfigurationAction.Console:
+                case ServiceAction.Console:
                     command = new ConsoleCommand();
                     break;
-                case ConfigurationAction.Install:
+                case ServiceAction.Install:
                     command = new InstallCommand();
                     break;
-                case ConfigurationAction.Uninstall:
+                case ServiceAction.Uninstall:
                     command = new UninstallCommand();
                     break;
-                case ConfigurationAction.Run:
+                case ServiceAction.Run:
                     command = new RunCommand();
                     break;
             }

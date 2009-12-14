@@ -20,12 +20,11 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.ServiceProcess;
-using Daemoniq.Framework;
 using Microsoft.Win32;
 
 namespace Daemoniq.Core
 {
-    static class ServiceControlHelper
+    public static class ServiceControlHelper
     {
         #region "SERVICE RECOVERY INTEROP"
         // ReSharper disable InconsistentNaming

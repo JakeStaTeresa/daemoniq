@@ -18,27 +18,26 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration.Install;
 using System.ServiceProcess;
-using Daemoniq.Framework;
 
 namespace Daemoniq.Core
 {
-    class WindowsServiceInstaller : IDisposable
+    public class WindowsServiceInstaller : IDisposable
     {
         private readonly TransactedInstaller transactedInstaller;
 
         public WindowsServiceInstaller(
             IEnumerable<ServiceInfo> services,
-            CommandLineArguments commandLineArguments,
+            IConfiguration configuration,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(services, commandLineArguments, assemblyPath);
+            LogHelper.EnterFunction(services, configuration, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(services, "services");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
 
             transactedInstaller = createTransactedInstaller(
                 services,
-                commandLineArguments,
+                configuration,
                 assemblyPath);
             LogHelper.LeaveFunction();
         }
@@ -64,12 +63,12 @@ namespace Daemoniq.Core
 
         private TransactedInstaller createTransactedInstaller(
             IEnumerable<ServiceInfo> services,
-            CommandLineArguments commandLineArguments,
+            IConfiguration configuration,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(services, commandLineArguments, assemblyPath);
+            LogHelper.EnterFunction(services, configuration, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(services, "services");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
 
             var returnValue = new TransactedInstaller();
@@ -80,7 +79,7 @@ namespace Daemoniq.Core
                     createServiceInstaller(serviceInfo));
             }
             installGroup.Installers.Add(
-                createServiceProcessInstaller(commandLineArguments));
+                createServiceProcessInstaller(configuration));
             returnValue.Installers.Add(installGroup);            
 
             string assemblyPathParameter = string.Format("/assemblypath={0}",
@@ -88,7 +87,7 @@ namespace Daemoniq.Core
             var args = new List<string> { assemblyPathParameter };
             args.AddRange(
                 getInstallContextArguments(
-                    commandLineArguments));
+                    configuration));
 
             var installContext = new InstallContext("", args.ToArray());
             returnValue.Context = installContext;
@@ -107,7 +106,7 @@ namespace Daemoniq.Core
                 ServiceName = serviceInfo.ServiceName,
                 Description = serviceInfo.Description,
                 DisplayName = serviceInfo.DisplayName,
-                StartType = toServiceStartMode(serviceInfo.StartMode)
+                StartType = serviceInfo.StartMode
             };
 
             if (serviceInfo.ServicesDependedOn.Count > 0)
@@ -125,16 +124,16 @@ namespace Daemoniq.Core
         }
 
         private ServiceProcessInstaller createServiceProcessInstaller(
-            CommandLineArguments commandLineArguments)
+            IConfiguration configuration)
         {
-            LogHelper.EnterFunction(commandLineArguments);
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            LogHelper.EnterFunction(configuration);
+            ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
 
-            var accountInfo = commandLineArguments.AccountInfo;
+            var accountInfo = configuration.AccountInfo;
             var serviceProcessInstaller = new ServiceProcessInstaller();
 
-            serviceProcessInstaller.Account = toServiceAccount(accountInfo.AccountType);
-            if (accountInfo.AccountType == AccountType.User &&
+            serviceProcessInstaller.Account = accountInfo.AccountType;
+            if (accountInfo.AccountType == ServiceAccount.User &&
                 !string.IsNullOrEmpty(accountInfo.Username) &&
                 !string.IsNullOrEmpty(accountInfo.Password))
             {
@@ -147,7 +146,7 @@ namespace Daemoniq.Core
         }
 
         private IEnumerable<string> getInstallContextArguments
-            (CommandLineArguments commandLineArguments)
+            (IConfiguration commandLineArguments)
         {
             LogHelper.EnterFunction(commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
@@ -163,50 +162,5 @@ namespace Daemoniq.Core
 
             LogHelper.LeaveFunction();
         }
-
-        private ServiceAccount toServiceAccount(AccountType accountType)
-        {
-            LogHelper.EnterFunction(accountType);
-            ServiceAccount serviceAccount = default(ServiceAccount);
-            switch (accountType)
-            {
-                case AccountType.LocalService:
-                    serviceAccount = ServiceAccount.LocalService;
-                    break;
-                case AccountType.LocalSystem:
-                    serviceAccount = ServiceAccount.LocalSystem;
-                    break;
-                case AccountType.NetworkService:
-                    serviceAccount = ServiceAccount.NetworkService;
-                    break;
-                case AccountType.User:
-                    serviceAccount = ServiceAccount.User;
-                    break;
-            }
-            LogHelper.LeaveFunction();
-            return serviceAccount;
-        }
-
-        private ServiceStartMode toServiceStartMode(StartMode startMode)
-        {
-            LogHelper.EnterFunction(startMode);
-
-            ServiceStartMode serviceStartMode = default(ServiceStartMode);
-            switch (startMode)
-            {
-                case StartMode.Automatic:
-                    serviceStartMode = ServiceStartMode.Automatic;
-                    break;
-                case StartMode.Disabled:
-                    serviceStartMode = ServiceStartMode.Disabled;
-                    break;
-                case StartMode.Manual:
-                    serviceStartMode = ServiceStartMode.Manual;
-                    break;                
-            }
-
-            LogHelper.LeaveFunction();
-            return serviceStartMode;
-        }        
     }
 }

@@ -17,10 +17,20 @@ using System;
 
 namespace Daemoniq.Core.Cli
 {
-    class ContextInfo
+    public class ContextInfo
     {
-        public Predicate<ParseResult> Selector { get; set; }
-        public Action<ParseResult> Action { get; set; }
-        public string[] ValidArguments { get; set; }
+        public Predicate<ParseResult> Selector { get; private set; }
+        public Action<ParseResult> Action { get; private set; }
+        public string[] ValidArguments { get; private set; }
+
+        public ContextInfo(
+            Predicate<ParseResult> selector,
+            Action<ParseResult> action,
+            string[] validArguments)
+        {
+            Selector = selector;
+            Action = action;
+            ValidArguments = validArguments;
+        }
     }
 }

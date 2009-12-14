@@ -21,7 +21,7 @@ using System.Threading;
 
 namespace Daemoniq.Core
 {
-    static class LogHelper
+    public static class LogHelper
     {
         private static readonly Dictionary<int, string> threadToIndentMap = 
             new Dictionary<int, string>();
