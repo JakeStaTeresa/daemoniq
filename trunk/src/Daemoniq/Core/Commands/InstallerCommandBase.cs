@@ -147,7 +147,6 @@ namespace Daemoniq.Core.Commands
             catch (Exception e)
             {                    
                 LogHelper.Error(e);
-                throw;
             }
             LogHelper.LeaveFunction();
         }
