@@ -9,12 +9,12 @@ Target(s) specified: full-build
 
 clean:
 
-   [delete] Deleting 11 files.
+   [delete] Deleting 22 files.
    [delete] Deleted 2 directories.
 
 build:
 
-  [msbuild] Build started 11/25/2009 1:29:40 AM.
+  [msbuild] Build started 12/5/2009 4:48:05 AM.
   [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" on node 0 (default targets).
   [msbuild]   Processing 0 EDMX files.
   [msbuild]   Finished processing 0 EDMX files.
@@ -22,6 +22,9 @@ build:
   [msbuild]   Creating directory "..\..\bin\Debug\".
   [msbuild] CoreCompile:
   [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] _CopyFilesMarkedCopyLocal:
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll" to "..\..\bin\Debug\Microsoft.Practices.ServiceLocation.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\Microsoft.Practices.ServiceLocation.xml" to "..\..\bin\Debug\Microsoft.Practices.ServiceLocation.xml".
   [msbuild] CopyFilesToOutputDirectory:
   [msbuild]   Copying file from "obj\Debug\Daemoniq.dll" to "..\..\bin\Debug\Daemoniq.dll".
   [msbuild]   Daemoniq -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.dll
@@ -32,8 +35,8 @@ build:
   [msbuild]     0 Warning(s)
   [msbuild]     0 Error(s)
   [msbuild] 
-  [msbuild] Time Elapsed 00:00:00.23
-  [msbuild] Build started 11/25/2009 1:29:41 AM.
+  [msbuild] Time Elapsed 00:00:00.32
+  [msbuild] Build started 12/5/2009 4:48:05 AM.
   [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Tests\Daemoniq.Tests.csproj" on node 0 (default targets).
   [msbuild]   Processing 0 EDMX files.
   [msbuild]   Finished processing 0 EDMX files.
@@ -50,6 +53,13 @@ build:
   [msbuild] Done Building Project "X:\DotNet\Projects\daemoniq\src\Daemoniq\Daemoniq.csproj" (default targets).
   [msbuild] CoreCompile:
   [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+  [msbuild] _CopyFilesMarkedCopyLocal:
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\Castle.Core.dll" to "..\..\bin\Debug\Castle.Core.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\Castle.DynamicProxy2.dll" to "..\..\bin\Debug\Castle.DynamicProxy2.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\Castle.MicroKernel.dll" to "..\..\bin\Debug\Castle.MicroKernel.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\Castle.Windsor.dll" to "..\..\bin\Debug\Castle.Windsor.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\CommonServiceLocator.WindsorAdapter.dll" to "..\..\bin\Debug\CommonServiceLocator.WindsorAdapter.dll".
+  [msbuild]   Copying file from "..\..\ext-bin\CommonServiceLocator\CommonServiceLocator.WindsorAdapter.pdb" to "..\..\bin\Debug\CommonServiceLocator.WindsorAdapter.pdb".
   [msbuild] _CopyAppConfigFile:
   [msbuild]   Copying file from "App.config" to "..\..\bin\Debug\Daemoniq.Samples.exe.config".
   [msbuild] CopyFilesToOutputDirectory:
@@ -60,8 +70,11 @@ build:
   [msbuild] CoreCompile:
   [msbuild] Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
   [msbuild] _CopyFilesMarkedCopyLocal:
+  [msbuild]   Copying file from "..\..\ext-bin\Moq\Moq.dll" to "..\..\bin\Debug\Moq.dll".
   [msbuild]   Copying file from "..\..\ext-bin\nunit\nunit.framework.dll" to "..\..\bin\Debug\nunit.framework.dll".
   [msbuild]   Copying file from "..\..\ext-bin\nunit\nunit.framework.xml" to "..\..\bin\Debug\nunit.framework.xml".
+  [msbuild]   Copying file from "..\..\ext-bin\Moq\Moq.pdb" to "..\..\bin\Debug\Moq.pdb".
+  [msbuild]   Copying file from "..\..\ext-bin\Moq\Moq.xml" to "..\..\bin\Debug\Moq.xml".
   [msbuild] CopyFilesToOutputDirectory:
   [msbuild]   Copying file from "obj\Debug\Daemoniq.Tests.dll" to "..\..\bin\Debug\Daemoniq.Tests.dll".
   [msbuild]   Daemoniq.Tests -> X:\DotNet\Projects\daemoniq\bin\Debug\Daemoniq.Tests.dll
@@ -72,8 +85,8 @@ build:
   [msbuild]     0 Warning(s)
   [msbuild]     0 Error(s)
   [msbuild] 
-  [msbuild] Time Elapsed 00:00:00.62
-  [msbuild] Build started 11/25/2009 1:29:41 AM.
+  [msbuild] Time Elapsed 00:00:01.31
+  [msbuild] Build started 12/5/2009 4:48:07 AM.
   [msbuild] Project "X:\DotNet\Projects\daemoniq\src\Daemoniq.Samples\Daemoniq.Samples.csproj" on node 0 (default targets).
   [msbuild]   Processing 0 EDMX files.
   [msbuild]   Finished processing 0 EDMX files.
@@ -97,18 +110,47 @@ build:
   [msbuild]     0 Warning(s)
   [msbuild]     0 Error(s)
   [msbuild] 
-  [msbuild] Time Elapsed 00:00:00.32
+  [msbuild] Time Elapsed 00:00:00.45
+
+test:
+
+   [nunit2] Installing services 'Dummy-ServiceRecoveryHelperTest'...
+   [nunit2] 
+   [nunit2] Running a transacted installation.
+   [nunit2] 
+   [nunit2] Beginning the Install phase of the installation.
+   [nunit2] Installing service Dummy:SRHT...
+   [nunit2] Service Dummy:SRHT has been successfully installed.
+   [nunit2] Creating EventLog source Dummy:SRHT in log Application...
+   [nunit2] 
+   [nunit2] The Install phase completed successfully, and the Commit phase is beginning.
+   [nunit2] 
+   [nunit2] The Commit phase completed successfully.
+   [nunit2] 
+   [nunit2] The transacted install has completed.
+   [nunit2] Services 'Dummy-ServiceRecoveryHelperTest' successfully installed.
+   [nunit2] Uninstalling services 'Dummy-ServiceRecoveryHelperTest'...
+   [nunit2] 
+   [nunit2] 
+   [nunit2] The uninstall is beginning.
+   [nunit2] Removing EventLog source Dummy:SRHT.
+   [nunit2] Service Dummy:SRHT is being removed from the system...
+   [nunit2] Service Dummy:SRHT was successfully removed from the system.
+   [nunit2] 
+   [nunit2] The uninstall has completed.
+   [nunit2] Services 'Dummy-ServiceRecoveryHelperTest' successfully uninstalled.
+   [nunit2] 
 
 package:
 
     [mkdir] Creating directory 'X:\DotNet\Projects\daemoniq\package'.
-      [zip] Zipping 8 files to 'X:\DotNet\Projects\daemoniq\package\Daemoniq.Binaries.1.0.0.beta1.zip'.
-      [zip] Zipping 153 files to 'X:\DotNet\Projects\daemoniq\package\Daemoniq.Sources.1.0.0.beta1.zip'.
+      [zip] Zipping 19 files to 'X:\DotNet\Projects\daemoniq\package\Daemoniq.Binaries.1.0.0.beta2.zip'.
+      [zip] Zipping 179 files to 'X:\DotNet\Projects\daemoniq\package\Daemoniq.Sources.1.0.0.beta2.zip'.
 
 full-build:
 
 
 BUILD SUCCEEDED
 
-Total time: 6.3 seconds.
+Total time: 21.4 seconds.
 
