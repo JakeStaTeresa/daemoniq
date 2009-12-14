@@ -16,26 +16,15 @@
 using System;
 using System.Collections.Generic;
 using System.ServiceProcess;
-using Daemoniq.Framework;
-using Microsoft.Practices.ServiceLocation;
-
 namespace Daemoniq.Core.Commands
 {
-    class RunCommand : InstallerCommandBase        
+    public class RunCommand : InstallerCommandBase        
     {
         public override void Execute(
-            IConfiguration configuration,
-            CommandLineArguments commandLineArguments)
+            IConfiguration configuration)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
+            LogHelper.EnterFunction(configuration);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
-
-            var serviceLocator = ServiceLocator.Current;
-            if (serviceLocator == null)
-            {
-                throw new InvalidOperationException("An error occured while getting service locator.");
-            }
 
             var servicesToRun = new List<ServiceBase>();
             foreach (var serviceInfo in configuration.Services)
@@ -45,19 +34,11 @@ namespace Daemoniq.Core.Commands
                     LogHelper.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
                     Console.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
                     continue;
-                }
+                }                
 
-                var serviceInstance =
-                    serviceLocator.GetInstance<IServiceInstance>(serviceInfo.ServiceName);
-                if (serviceInstance == null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format("An error located while resolving service instance '{0}'. ", serviceInfo.ServiceName));
-                }
-
-                servicesToRun.Add(new WindowsServiceBase(
-                    serviceInfo.ServiceName,
-                    serviceInstance));
+                servicesToRun.Add(
+                    new WindowsServiceBase(
+                        serviceInfo.ServiceName));
             }
 
             try

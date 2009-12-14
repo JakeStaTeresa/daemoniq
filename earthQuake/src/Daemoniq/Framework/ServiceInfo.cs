@@ -2,7 +2,7 @@
 using Daemoniq.Configuration;
 
 namespace Daemoniq.Framework
-{
+{  
     public class ServiceInfo
     {
         private readonly List<string> servicesDependedOn;

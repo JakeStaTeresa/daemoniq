@@ -15,7 +15,7 @@
  */
 namespace Daemoniq.Core.Cli
 {
-    enum ArgumentType
+    public enum ArgumentType
     {
         Normal,
         Flag,

@@ -13,11 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-namespace Daemoniq.Core.Commands
+using System.Collections.Generic;
+
+namespace Daemoniq.Core
 {
-    public interface ICommand
+    public interface IConfiguration
     {
-        void Execute(
-            IConfiguration configuration);
+        ServiceAction Action { get; set; }
+        AccountInfo AccountInfo { get; set; }
+        bool AllowServiceToInteractWithDesktop { get; set; }
+        string LogFile { get; set; }
+        bool? LogToConsole { get; set; }
+        bool? ShowCallStack { get; set; }
+        List<ServiceInfo> Services { get; }
     }
 }

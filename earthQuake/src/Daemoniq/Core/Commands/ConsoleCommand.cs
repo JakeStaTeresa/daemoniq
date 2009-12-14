@@ -15,22 +15,19 @@
  */
 using System;
 using System.Collections.Generic;
-using Daemoniq.Framework;
 using Microsoft.Practices.ServiceLocation;
 
 namespace Daemoniq.Core.Commands
 {
-    class ConsoleCommand : ICommand
+    public class ConsoleCommand : ICommand
     {
         #region ICommand Members
 
         public void Execute(
-            IConfiguration configuration,
-            CommandLineArguments commandLineArguments)
+            IConfiguration configuration)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
+            LogHelper.EnterFunction(configuration);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
-            ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
  
             var serviceLocator = ServiceLocator.Current;
             if(serviceLocator == null)

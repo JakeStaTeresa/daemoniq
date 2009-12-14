@@ -21,24 +21,20 @@ using System.Text;
 
 namespace Daemoniq.Core.Cli
 {
-    class Parser
+    public class Parser
     {
-        private readonly Configuration configuration;
+        private readonly ArgumentFormat argumentFormat;
         private readonly string headerText;
         private readonly string programName;
         private string usageText;
         private string argumentList;
         private readonly List<ArgumentInfo> arguments;
         private readonly List<ContextInfo> contexts;
+        private readonly int consoleWidth = 78;
 
-        public Parser()
-            :this(Configuration.Default)
-        {            
-        }
-
-        public Parser(Configuration configuration)
+        public Parser(ArgumentFormat argumentFormat)
         {
-            this.configuration = configuration; 
+            this.argumentFormat = argumentFormat; 
             arguments = new List<ArgumentInfo>();
             contexts = new List<ContextInfo>();
 
@@ -62,9 +58,8 @@ namespace Daemoniq.Core.Cli
             programName = Path.GetFileNameWithoutExtension(versionInfo.FileName);
 
             Arguments.Add(
-                new ArgumentInfo
+                new ArgumentInfo("help", ArgumentFormat.Default)
                 {
-                    LongArgument = "help",
                     ShortArgument = "h",
                     Type =  ArgumentType.Flag,
                     AcceptedValues = new []{ "true", "false"},
@@ -140,9 +135,9 @@ namespace Daemoniq.Core.Cli
             }
         }
 
-        public Configuration Configuration
+        public ArgumentFormat Format
         {
-            get { return configuration; }
+            get { return argumentFormat; }
         }
 
         public List<ArgumentInfo> Arguments
@@ -240,21 +235,30 @@ namespace Daemoniq.Core.Cli
             for (int i = 0; i < argumentArray.Length; i++)
             {
                 string argument = argumentArray[i].Trim();
-                if (!argument.StartsWith(configuration.ArgumentPrefix))
+                if (!argument.StartsWith(argumentFormat.LongArgumentPrefix) ||
+                    !argument.StartsWith(argumentFormat.ShortArgumentPrefix))
                 {
-                    parseResult.Errors.Add(string.Format("Argument '{0}' must start with prefix '{1}'",
-                                                  argument, configuration.ArgumentPrefix));
+                    string errorMessage = string.Format("Argument '{0}' must start with prefix '{1}'",
+                                                  argument, argumentFormat.LongArgumentPrefix);
+                    if(argumentFormat.LongArgumentPrefix !=
+                        argumentFormat.ShortArgumentPrefix)
+                    {
+                        errorMessage = string.Format("Argument '{0}' must start with either '{1}' or '{2}'",
+                                                  argument, argumentFormat.LongArgumentPrefix,
+                                                  argumentFormat.ShortArgumentPrefix);
+                    }
+                    parseResult.Errors.Add(errorMessage);
                     continue;
                 }
 
                 argument = argument.Substring(1);
                 ArgumentInfo argumentInfo;
-                if (!argument.Contains(configuration.KeyValueSeparator))
+                if (!argument.Contains(argumentFormat.KeyValueSeparator))
                 {
                     if (!argumentMap.ContainsKey(argument))
                     {
                         parseResult.Errors.Add(string.Format("Argument '{0}' must have the following key value separator '{1}'",
-                                                      argument, configuration.KeyValueSeparator));
+                                                      argument, argumentFormat.KeyValueSeparator));
                         continue;
                     }
 
@@ -262,7 +266,7 @@ namespace Daemoniq.Core.Cli
                     if (argumentInfo.Type == ArgumentType.Normal)
                     {
                         parseResult.Errors.Add(string.Format("Argument '{0}' must have the following key value separator '{1}'",
-                                                      argument, configuration.KeyValueSeparator));
+                                                      argument, argumentFormat.KeyValueSeparator));
                         continue;
                     }
 
@@ -277,7 +281,7 @@ namespace Daemoniq.Core.Cli
 
                         argument = string.Format("{0}{1}{2}",
                                                  argument,
-                                                 configuration.KeyValueSeparator,
+                                                 argumentFormat.KeyValueSeparator,
                                                  argumentInfo.DefaultValue);    
                     }
 
@@ -286,12 +290,12 @@ namespace Daemoniq.Core.Cli
                         string password = getPassword();
                         argument = string.Format("{0}{1}{2}",
                                                  argument,
-                                                 configuration.KeyValueSeparator,
+                                                 argumentFormat.KeyValueSeparator,
                                                  password);
                     }
                 }
 
-                string[] kv = argument.Split(new[] { configuration.KeyValueSeparator },
+                string[] kv = argument.Split(new[] { argumentFormat.KeyValueSeparator },
                                              StringSplitOptions.RemoveEmptyEntries);
 
                 string argumentName = kv[0];
@@ -443,7 +447,7 @@ namespace Daemoniq.Core.Cli
                 firstColumnText,
                 new string(' ', firstColumnLength - firstColumnText.Length));
 
-            int descriptionLength = configuration.ConsoleWidth - firstColumnLength - 5;
+            int descriptionLength = consoleWidth - firstColumnLength - 5;
             int chunkCount = secondColumnText.Length / descriptionLength;
             int remainder = secondColumnText.Length % descriptionLength;
             if (remainder != 0)

@@ -13,11 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-namespace Daemoniq.Core.Commands
+namespace Daemoniq.Core
 {
-    public interface ICommand
+    public enum ServiceRecoveryAction
     {
-        void Execute(
-            IConfiguration configuration);
+        TakeNoAction,
+        RestartTheService,
+        RunAProgram,
+        RestartTheComputer        
     }
 }

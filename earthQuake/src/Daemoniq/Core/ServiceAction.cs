@@ -13,11 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-namespace Daemoniq.Core.Commands
+namespace Daemoniq.Core
 {
-    public interface ICommand
-    {
-        void Execute(
-            IConfiguration configuration);
+    public enum ServiceAction
+    {        
+        Install,
+        Uninstall,
+        Console,
+        Run
     }
 }
