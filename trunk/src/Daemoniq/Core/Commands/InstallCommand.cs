@@ -14,26 +14,31 @@
  *  limitations under the License.
  */
 using System.Reflection;
+
+using Common.Logging;
 using Daemoniq.Framework;
 
 namespace Daemoniq.Core.Commands
 {
     class InstallCommand:InstallerCommandBase
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         public override void Execute(
             IConfiguration configuration,
             CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
-
+            
+            log.Debug(m => m("Executing install command..."));
+            
             Assembly entryAssembly = Assembly.GetEntryAssembly();
             ThrowHelper.ThrowInvalidOperationExceptionIf(
                 a => a == null, entryAssembly,
                 "Unable to get entry assembly.");
             Execute(configuration, commandLineArguments, entryAssembly.Location);
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done executing install command."));            
         }
 
         public void Execute(
@@ -41,13 +46,11 @@ namespace Daemoniq.Core.Commands
             CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
 
-            Install(configuration, commandLineArguments, assemblyPath);
-            LogHelper.LeaveFunction();
+            Install(configuration, commandLineArguments, assemblyPath);           
         }
     }
 }

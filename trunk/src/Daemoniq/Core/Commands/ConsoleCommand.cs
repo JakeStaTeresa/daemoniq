@@ -15,6 +15,8 @@
  */
 using System;
 using System.Collections.Generic;
+
+using Common.Logging;
 using Daemoniq.Framework;
 using Microsoft.Practices.ServiceLocation;
 
@@ -22,16 +24,19 @@ namespace Daemoniq.Core.Commands
 {
     class ConsoleCommand : ICommand
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         #region ICommand Members
 
         public void Execute(
             IConfiguration configuration,
             CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
- 
+            
+            log.Debug(m => m("Executing console command..."));
+            
             var serviceLocator = ServiceLocator.Current;
             if(serviceLocator == null)
             {
@@ -70,10 +75,11 @@ namespace Daemoniq.Core.Commands
             {
                 Console.WriteLine("An error occured while running service process.");
                 Console.WriteLine(e);
+                log.Error(e);
             }
             finally
             {
-                LogHelper.LeaveFunction();
+                log.Debug(m => m("Done executing console command..."));            
             }
         }
 

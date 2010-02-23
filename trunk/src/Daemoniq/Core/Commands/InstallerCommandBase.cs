@@ -16,6 +16,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Common.Logging;
 using Daemoniq.Framework;
 using Microsoft.Practices.ServiceLocation;
 
@@ -23,6 +25,8 @@ namespace Daemoniq.Core.Commands
 {
     abstract class InstallerCommandBase : ICommand        
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         public void Install(
             IConfiguration configuration,
             CommandLineArguments commandLineArguments,
@@ -86,17 +90,7 @@ namespace Daemoniq.Core.Commands
             Action<WindowsServiceInstaller> operationAction,
             Converter<string, string> postOperationMessageConverter,
             Action<IEnumerable<ServiceInfo>> postOperationAction)
-        {
-            LogHelper.EnterFunction(configuration, 
-                commandLineArguments,
-                assemblyPath,
-                exclusionFilter,
-                exclusionMessageConverter,
-                preOperationMessageConverter,
-                cancelMessage,
-                operationAction,
-                postOperationMessageConverter,
-                postOperationAction);
+        {            
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
@@ -108,6 +102,8 @@ namespace Daemoniq.Core.Commands
             ThrowHelper.ThrowArgumentNullIfNull(postOperationMessageConverter, "postOperationMessageConverter");
             ThrowHelper.ThrowArgumentNullIfNull(postOperationAction, "postOperationAction");
 
+            log.Debug(m => m("Executing installer command '{0}'...", operationAction));            
+
             var services =
                 getServicesToPerformActionOn(configuration,
                                               exclusionFilter,
@@ -115,7 +111,7 @@ namespace Daemoniq.Core.Commands
 
             if (services.Count == 0)
             {
-                LogHelper.WriteLine(cancelMessage);
+                log.Info(cancelMessage);
                 Console.WriteLine(cancelMessage);
                 return;
             }
@@ -129,7 +125,7 @@ namespace Daemoniq.Core.Commands
                         Array.ConvertAll(services.ToArray(),
                                          s => s.DisplayName));
                 string preOperationMessage = preOperationMessageConverter(displayNames);
-                LogHelper.WriteLine(preOperationMessage);
+                log.Info(preOperationMessage);
                 Console.WriteLine(preOperationMessage);
                 using(var installer = new WindowsServiceInstaller(
                     services,
@@ -139,16 +135,16 @@ namespace Daemoniq.Core.Commands
                     operationAction(installer);
                 }
                 string postOperationMessage = postOperationMessageConverter(displayNames);
-                LogHelper.WriteLine(postOperationMessage);
+                log.Info(postOperationMessage);
                 Console.WriteLine(postOperationMessage);
 
                 postOperationAction(services);
             }
             catch (Exception e)
-            {                    
-                LogHelper.Error(e);
+            {
+                log.Error(e);
             }
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done executing installer command '{0}'...", operationAction));            
         }
 
         private IList<ServiceInfo> getServicesToPerformActionOn(
@@ -162,7 +158,7 @@ namespace Daemoniq.Core.Commands
                 if (predicate(serviceInfo))
                 {
                     string message = converter(serviceInfo);
-                    LogHelper.WriteLine(message);
+                    log.Info(message);
                     Console.WriteLine(message);
                     continue;
                 }
@@ -182,7 +178,7 @@ namespace Daemoniq.Core.Commands
             }
             catch (Exception e)
             {
-                LogHelper.Error(e);
+                log.Error(e);
             }
 
             if (serviceLocator == null)

@@ -13,10 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using System;
+
 namespace Daemoniq.Framework
 {    
+    public interface IServiceRegistry
+    {
+        void FromXml();
+        void AddInstance(object instance);
+        void AddInstance<T>(T instance);
+        void AddInstance(object instance, string name);
+        void AddInstance<T>(T instance, string name);
+        void DeleteInstance(Type type, string name);
+        void DeleteInstance<T>(string name);
+        void DeleteAllInstance(Type type);
+        void DeleteAllInstance<T>();
+    }
+
     public interface IConfigurer
-    {        
+    {           
         IConfiguration Configure();
+
     }
 }

@@ -20,6 +20,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.ServiceProcess;
+
+using Common.Logging;
 using Daemoniq.Framework;
 using Microsoft.Win32;
 
@@ -27,6 +29,8 @@ namespace Daemoniq.Core
 {
     static class ServiceControlHelper
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         #region "SERVICE RECOVERY INTEROP"
         // ReSharper disable InconsistentNaming
         enum SC_ACTION_TYPE
@@ -114,43 +118,16 @@ namespace Daemoniq.Core
         private const int SE_PRIVILEGE_ENABLED = 2;
         // ReSharper restore InconsistentNaming
         #endregion
-
-        #region "GET PROCESS ID FROM SERVICE NAME INTEROP"
-        // ReSharper disable InconsistentNaming
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct SERVICE_STATUS_PROCESS
-        {
-            public int dwServiceType;
-            public int dwCurrentState;
-            public int dwControlsAccepted;
-            public int dwWin32ExitCode;
-            public int dwServiceSpecificExitCode;
-            public int dwCheckPoint;
-            public int dwWaitHint;
-            public int dwProcessId;
-            public int dwServiceFlags;
-        }
-
-        [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
-        internal static extern bool QueryServiceStatusEx(SafeHandle safeHandle, int infoLevel, IntPtr pBuffer, int cbBufSize, out int pcbBytesNeeded);
-    
-        //[DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        //static extern bool QueryServiceStatusEx(IntPtr hService,
-        //                                              int InfoLevel,
-        //                                              IntPtr dwServiceStatus,
-        //                                              int cbBufSize,
-        //                                              out int pcbBytesNeeded);
-        // ReSharper restore InconsistentNaming
-        #endregion
-
+       
         [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
         public static void SetServiceRecoveryOptions(
             string serviceName,
             ServiceRecoveryOptions recoveryOptions)
         {
-            LogHelper.EnterFunction(serviceName, recoveryOptions);
             ThrowHelper.ThrowArgumentNullIfNull(serviceName, "serviceName");
+            ThrowHelper.ThrowArgumentOutOfRangeIfEmpty(serviceName, "serviceName");
+
+            log.Debug(m => m("Setting service recovery options..."));            
 
             bool requiresShutdownPriveleges =
                 recoveryOptions.FirstFailureAction == ServiceRecoveryAction.RestartTheComputer ||
@@ -231,7 +208,7 @@ namespace Daemoniq.Core
                     controller.Close();
                 }
 
-                LogHelper.LeaveFunction();
+                log.Debug(m => m("Done setting service recovery options."));   
             }
         }
 
@@ -239,6 +216,11 @@ namespace Daemoniq.Core
         public static ServiceRecoveryOptions GetServiceRecoveryOptions(
             string serviceName)
         {
+            ThrowHelper.ThrowArgumentNullIfNull(serviceName, "serviceName");
+            ThrowHelper.ThrowArgumentOutOfRangeIfEmpty(serviceName, "serviceName");
+
+            log.Debug(m => m("Getting service recovery options..."));            
+
             // 8KB is the largest buffer supported by QueryServiceConfig2
             const int bufferSize = 1024 * 8;
 
@@ -311,75 +293,32 @@ namespace Daemoniq.Core
                     controller.Close();
                 }
 
-                LogHelper.LeaveFunction();
+                log.Debug(m => m("Done getting service recovery options."));            
             }
 
             
             return recoveryOptions;
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-        public static int GetProcessIdForServiceName(string serviceName)
-        {
-            LogHelper.EnterFunction(serviceName);
-            ThrowHelper.ThrowArgumentNullIfNull(serviceName, "serviceName");
-
-            ServiceController controller = null;
-            IntPtr serviceStatusHandle = IntPtr.Zero;
-            int processId;
-            try
-            {
-                // Open the service
-                controller = new ServiceController(serviceName);
-                int cbBytesNeeded= Marshal.SizeOf(typeof(SERVICE_STATUS_PROCESS));
-
-                bool success;                
-
-                serviceStatusHandle = Marshal.AllocHGlobal(cbBytesNeeded);         
-                success = QueryServiceStatusEx(controller.ServiceHandle,
-                                                        0,
-                                                        serviceStatusHandle,
-                                                        cbBytesNeeded,
-                                                        out cbBytesNeeded);
-                if (!success)
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get the process id for serviceName.");
-                }
-
-                SERVICE_STATUS_PROCESS serviceStatus = (SERVICE_STATUS_PROCESS)Marshal.PtrToStructure(
-                    serviceStatusHandle, typeof(SERVICE_STATUS_PROCESS));
-                processId = serviceStatus.dwProcessId;                                      
-            }
-            finally
-            {
-                if(serviceStatusHandle != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(serviceStatusHandle);    
-                }
-
-                if (controller != null)
-                {
-                    controller.Close();
-                }
-
-                LogHelper.LeaveFunction();
-            }
-            return processId;        
-        }
-
         public static bool IsServiceInstalled(string serviceName)
         {
-            LogHelper.EnterFunction(serviceName);
             ThrowHelper.ThrowArgumentNullIfNull(serviceName, "serviceName");
             ThrowHelper.ThrowArgumentOutOfRangeIfEmpty(serviceName, "serviceName");
+
+            log.Debug(m => m("Checking if service '{0}' is already installed...", serviceName));            
+
             bool returnValue = GetInstalledServices().Contains(serviceName);
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Service '{0}' is {1} installed.", serviceName, returnValue ? "already" : "not yet"));
             return returnValue;
         }        
 
         public static void AllowServiceToInteractWithDesktop(string serviceName)
         {
-            LogHelper.EnterFunction(serviceName);
+            ThrowHelper.ThrowArgumentNullIfNull(serviceName, "serviceName");
+            ThrowHelper.ThrowArgumentOutOfRangeIfEmpty(serviceName, "serviceName");
+
+            log.Debug(m => m("Allowing service '{0}' to interact with desktop...", serviceName));            
+
             RegistryKey registryKey = null;
             try
             {
@@ -402,21 +341,20 @@ namespace Daemoniq.Core
                     registryKey.Close();
                 }
             }
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done allowing service '{0}' to interact with desktop.", serviceName));
         }
 
         public static List<string> GetInstalledServices()
         {
-            LogHelper.EnterFunction();
             var returnValue = GetInstalledServices(s => true);
-            LogHelper.LeaveFunction();
             return returnValue;
         }
 
         public static List<string> GetInstalledServices(
             Predicate<ServiceController> filter)
-        {            
-            LogHelper.EnterFunction();
+        {
+            log.Debug(m => m("Getting list of installed services..."));
+            
             var serviceControllers = Array.ConvertAll(
                 ServiceController.GetServices(), s => s );
             
@@ -424,7 +362,8 @@ namespace Daemoniq.Core
                 Array.ConvertAll(
                     Array.FindAll(serviceControllers, filter),
                     s => s.ServiceName));
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done getting list of installed services. Found '{0}' services.", returnValue.Count));            
+            
             return returnValue;
         }
 
@@ -477,7 +416,8 @@ namespace Daemoniq.Core
         [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]        
         private static void grantShutdownPrivileges()
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Granting shutdown privileges to process user..."));            
+            
             IntPtr tokenHandle = IntPtr.Zero;
             
             TOKEN_PRIVILEGES tkp = new TOKEN_PRIVILEGES();
@@ -512,7 +452,7 @@ namespace Daemoniq.Core
                 {
                     Marshal.FreeHGlobal(tokenHandle);
                 }
-                LogHelper.LeaveFunction();
+                log.Debug(m => m("Done granting shutdown privileges to process user."));                        
             }
         }
     }

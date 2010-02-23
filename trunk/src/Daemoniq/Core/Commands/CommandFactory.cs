@@ -13,15 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+using Common.Logging;
 using Daemoniq.Framework;
 
 namespace Daemoniq.Core.Commands
 {
     class CommandFactory
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         public static ICommand CreateInstance(ConfigurationAction action)
         {
-            LogHelper.EnterFunction(action);
+            log.Debug(m => m("Creating command instance for action '{0}'...", action));
             var command = default(ICommand);
             switch (action)
             {
@@ -38,7 +41,7 @@ namespace Daemoniq.Core.Commands
                     command = new RunCommand();
                     break;
             }
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done creating command instance for action '{0}'.", action));
             return command;
         }
     }
