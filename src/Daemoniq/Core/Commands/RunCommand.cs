@@ -16,6 +16,8 @@
 using System;
 using System.Collections.Generic;
 using System.ServiceProcess;
+
+using Common.Logging;
 using Daemoniq.Framework;
 using Microsoft.Practices.ServiceLocation;
 
@@ -23,14 +25,17 @@ namespace Daemoniq.Core.Commands
 {
     class RunCommand : InstallerCommandBase        
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         public override void Execute(
             IConfiguration configuration,
             CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(configuration, commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(configuration, "configuration");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
-
+            
+            log.Debug(m => m("Executing run command..."));
+            
             var serviceLocator = ServiceLocator.Current;
             if (serviceLocator == null)
             {
@@ -42,8 +47,7 @@ namespace Daemoniq.Core.Commands
             {
                 if (!ServiceControlHelper.IsServiceInstalled(serviceInfo.ServiceName))
                 {
-                    LogHelper.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
-                    Console.WriteLine("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
+                    log.InfoFormat("Service '{0}' is not yet installed.", serviceInfo.DisplayName);
                     continue;
                 }
 
@@ -62,14 +66,14 @@ namespace Daemoniq.Core.Commands
 
             try
             {
-                LogHelper.WriteLine("Starting service process...");
+                log.Info("Starting service process...");
                 ServiceBase.Run(servicesToRun.ToArray());
             }
             catch (Exception e)
             {             
-                LogHelper.Error(e);                   
-            }            
-            LogHelper.LeaveFunction();
+                log.Error(e);                   
+            }
+            log.Debug(m => m("Done executing run command."));            
         }
     }
 }

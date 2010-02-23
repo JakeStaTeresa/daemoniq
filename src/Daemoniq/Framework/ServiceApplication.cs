@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 using System;
+
+using Common.Logging;
 using Daemoniq.Core;
 using Daemoniq.Core.Cli;
 using Daemoniq.Core.Commands;
@@ -22,6 +24,8 @@ namespace Daemoniq.Framework
 {
     public class ServiceApplication
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+
         public IConfigurer Configurer { get; set; }
 
         public ServiceApplication()
@@ -31,8 +35,9 @@ namespace Daemoniq.Framework
 
         public void Run(string[] arguments)
         {
-            LogHelper.EnterFunction(arguments);
             ThrowHelper.ThrowArgumentNullIfNull(arguments, "arguments");
+
+            log.Debug(m => m("Running service application..."));            
 
             var commandLineArguments = new CommandLineArguments();
             Parser parser = initializeParser(commandLineArguments);
@@ -101,7 +106,7 @@ namespace Daemoniq.Framework
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey(true);
             }
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done running service application."));            
         }
 
         private string[] promptForArguments()
@@ -332,7 +337,7 @@ namespace Daemoniq.Framework
             bool returnValue = false;
             try
             {                
-                LogHelper.WriteLine("Console [ Title:{0} ]", Console.Title);
+                log.DebugFormat("Console [ Title:{0} ]", Console.Title);
             }
             catch
             {

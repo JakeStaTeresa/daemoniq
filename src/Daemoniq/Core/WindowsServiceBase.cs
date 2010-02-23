@@ -15,12 +15,14 @@
  */
 using System.ServiceProcess;
 
+using Common.Logging;
 using Daemoniq.Framework;
 
 namespace Daemoniq.Core
 {
     class WindowsServiceBase:ServiceBase        
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
         private readonly IServiceInstance serviceInstance;
 
         public WindowsServiceBase(string serviceName,
@@ -34,68 +36,70 @@ namespace Daemoniq.Core
 
         protected override void OnStart(string[] args)
         {
-            LogHelper.EnterFunction(args);             
+            log.Debug(m => m("Staring service '{0}'...", ServiceName));           
             serviceInstance.OnStart();
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Service '{0}' started.", ServiceName));                       
         }
 
         protected override void OnStop()
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Stopping service '{0}'...", ServiceName));
             if (serviceInstance.CanStop)
                 serviceInstance.OnStop();
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Service '{0}' stopped.", ServiceName));                      
         }
 
         protected override void OnPause()
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Pausing service '{0}'...", ServiceName));
             if (serviceInstance.CanPauseAndContinue)
                 serviceInstance.OnPause();
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Service '{0}' paused.", ServiceName));              
         }
 
         protected override void OnContinue()
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Continuing service '{0}'...", ServiceName));
             if (serviceInstance.CanPauseAndContinue)
                 serviceInstance.OnContinue();
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Service '{0}' continued.", ServiceName));              
         }
 
         protected override void OnShutdown()
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Shutting down service '{0}'...", ServiceName));
             if (serviceInstance.CanShutdown)
                 serviceInstance.OnShutdown();
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Service '{0}' shut down.", ServiceName));             
         }
 
         protected override void OnCustomCommand(int command)
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Executing custom command '{0}' on service '{1}'...", command, ServiceName));
             if (serviceInstance.CanHandleCustomCommand)
                 serviceInstance.OnCustomCommand(command);
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done executing custom command '{0}' on service '{1}'.", command, ServiceName));            
         }
 
         protected override bool OnPowerEvent(
             PowerBroadcastStatus powerStatus)
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Handling power event '{0}' on service '{1}'...", powerStatus, ServiceName));
+            bool returnValue = false;
             if (serviceInstance.CanHandlePowerEvent)
-                return serviceInstance.OnPowerEvent(powerStatus);
-            LogHelper.LeaveFunction();
-            return false;
+                returnValue = serviceInstance.OnPowerEvent(powerStatus);
+            log.Debug(m => m("Done handling power event '{0}' on service '{1}'.", powerStatus, ServiceName));
+            return returnValue;
         }
 
         protected override void OnSessionChange(
             SessionChangeDescription changeDescription)
         {
-            LogHelper.EnterFunction();
+            log.Debug(m => m("Handling session changed event on service '{0}'...", ServiceName));
             if (serviceInstance.CanHandleSessionChangeEvent)
                 serviceInstance.OnSessionChange(changeDescription);
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done handling session changed event on service '{0}'.", ServiceName));
+            
         }
     }
 }

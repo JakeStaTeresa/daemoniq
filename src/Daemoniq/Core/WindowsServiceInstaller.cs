@@ -18,12 +18,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration.Install;
 using System.ServiceProcess;
+
+using Common.Logging;
 using Daemoniq.Framework;
 
 namespace Daemoniq.Core
 {
     class WindowsServiceInstaller : IDisposable
     {
+        private static ILog log = LogManager.GetCurrentClassLogger();
+        
         private readonly TransactedInstaller transactedInstaller;
 
         public WindowsServiceInstaller(
@@ -31,16 +35,14 @@ namespace Daemoniq.Core
             CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(services, commandLineArguments, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(services, "services");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
-
+            
             transactedInstaller = createTransactedInstaller(
                 services,
                 commandLineArguments,
-                assemblyPath);
-            LogHelper.LeaveFunction();
+                assemblyPath);            
         }
 
         public void Install()
@@ -67,10 +69,11 @@ namespace Daemoniq.Core
             CommandLineArguments commandLineArguments,
             string assemblyPath)
         {
-            LogHelper.EnterFunction(services, commandLineArguments, assemblyPath);
             ThrowHelper.ThrowArgumentNullIfNull(services, "services");
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
             ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
+
+            log.Debug(m => m("Creating transacted installer..."));                                   
 
             var returnValue = new TransactedInstaller();
             var installGroup = new Installer();
@@ -80,7 +83,7 @@ namespace Daemoniq.Core
                     createServiceInstaller(serviceInfo));
             }
             installGroup.Installers.Add(
-                createServiceProcessInstaller(commandLineArguments));
+                createServiceProcessInstaller(commandLineArguments, assemblyPath));
             returnValue.Installers.Add(installGroup);            
 
             string assemblyPathParameter = string.Format("/assemblypath={0}",
@@ -93,14 +96,15 @@ namespace Daemoniq.Core
             var installContext = new InstallContext("", args.ToArray());
             returnValue.Context = installContext;
 
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done creating transacted installer."));                                   
+
             return returnValue;
         }
         
         private ServiceInstaller createServiceInstaller(ServiceInfo serviceInfo)
         {
-            LogHelper.EnterFunction(serviceInfo);
             ThrowHelper.ThrowArgumentNullIfNull(serviceInfo, "serviceInfo");
+            log.Debug(m => m("Creating service installer for service '{0}'...", serviceInfo.ServiceName));                                   
 
             var serviceInstaller = new ServiceInstaller
             {
@@ -120,15 +124,18 @@ namespace Daemoniq.Core
                     serviceInstaller.ServicesDependedOn[i] = serviceDependedOn;
                 }
             }
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done creating service installer for service '{0}'.", serviceInfo.ServiceName));                                   
+                                  
             return serviceInstaller;
         }
 
         private ServiceProcessInstaller createServiceProcessInstaller(
-            CommandLineArguments commandLineArguments)
+            CommandLineArguments commandLineArguments,
+            string assemblyPath)
         {
-            LogHelper.EnterFunction(commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
+            ThrowHelper.ThrowArgumentNullIfNull(assemblyPath, "assemblyPath");
+            log.Debug(m => m("Creating service process installer for assembly '{0}'...", assemblyPath));                                   
 
             var accountInfo = commandLineArguments.AccountInfo;
             var serviceProcessInstaller = new ServiceProcessInstaller();
@@ -142,14 +149,13 @@ namespace Daemoniq.Core
                 serviceProcessInstaller.Password = accountInfo.Password;
             }
 
-            LogHelper.LeaveFunction();
+            log.Debug(m => m("Done creating service process installer for assembly '{0}'.", assemblyPath));                                                                    
             return serviceProcessInstaller;
         }
 
         private IEnumerable<string> getInstallContextArguments
             (CommandLineArguments commandLineArguments)
         {
-            LogHelper.EnterFunction(commandLineArguments);
             ThrowHelper.ThrowArgumentNullIfNull(commandLineArguments, "commandLineArguments");
 
             if (!string.IsNullOrEmpty(commandLineArguments.LogFile))
@@ -160,13 +166,10 @@ namespace Daemoniq.Core
 
             if (commandLineArguments.ShowCallStack.HasValue)
                 yield return string.Format("/showcallstack");
-
-            LogHelper.LeaveFunction();
         }
 
         private ServiceAccount toServiceAccount(AccountType accountType)
         {
-            LogHelper.EnterFunction(accountType);
             ServiceAccount serviceAccount = default(ServiceAccount);
             switch (accountType)
             {
@@ -183,14 +186,11 @@ namespace Daemoniq.Core
                     serviceAccount = ServiceAccount.User;
                     break;
             }
-            LogHelper.LeaveFunction();
             return serviceAccount;
         }
 
         private ServiceStartMode toServiceStartMode(StartMode startMode)
         {
-            LogHelper.EnterFunction(startMode);
-
             ServiceStartMode serviceStartMode = default(ServiceStartMode);
             switch (startMode)
             {
@@ -205,7 +205,6 @@ namespace Daemoniq.Core
                     break;                
             }
 
-            LogHelper.LeaveFunction();
             return serviceStartMode;
         }        
     }
