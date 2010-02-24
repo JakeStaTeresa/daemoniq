@@ -1,0 +1,1 @@
+set NANT_VERSION=0.86-beta1

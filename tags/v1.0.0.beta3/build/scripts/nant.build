@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<project name="Daemoniq" default="package">
+<!--
+    <property name="nant.settings.currentframework" value="net-3.5" />
+-->    
+    <property name="configuration" value="Debug" overwrite="true" />
+    
+    <property name="output.binary.path" value="../../bin/${configuration}"/>
+    <property name="source.path" value="../../src"/>
+    <property name="external.binary.path" value="../../ext-bin"/>
+
+    <property name="nant.directory" value="nant-0.86-beta1" />    
+    <property name="package.path" value="../../package" />
+    <property name="package.version" value="1.0.0.beta3" overwrite="true" />
+    <property name="sources.package" value="Daemoniq.Sources.${package.version}.zip" />
+    <property name="binaries.package" value="Daemoniq.Binaries.${package.version}.zip" />
+    
+    <target name="clean">
+        <delete>
+            <fileset>
+                <include name="${output.binary.path}/**" />
+                <include name="${package.path}/**" />
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="copy-dependencies" description="Copying all external dependencies to binary.path">      
+      <copy todir="${output.binary.path}">
+          <fileset basedir="${external.binary.path}/CommonServiceLocator">
+              <include name="Castle.*" />
+              <include name="CommonServiceLocator.WindsorAdapter.*" />
+          </fileset>
+      </copy>
+      <copy todir="${output.binary.path}">
+          <fileset basedir="${external.binary.path}/Common.Logging">
+              <include name="Common.Logging.Log4Net.*" />
+          </fileset>
+      </copy>
+      <copy todir="${output.binary.path}">
+          <fileset basedir="${external.binary.path}/Common.ServiceProvider">
+              <include name="Windsor.ServiceProvider.*" />
+          </fileset>
+      </copy>
+    </target>    
+
+    <target name="build">
+        <msbuild project="${source.path}/Daemoniq/Daemoniq.csproj">
+              <arg value="/property:Configuration=${configuration}" />              
+       </msbuild>
+       <msbuild project="${source.path}/Daemoniq.Tests/Daemoniq.Tests.csproj">
+               <arg value="/property:Configuration=${configuration}" />              
+       </msbuild>
+       <msbuild project="${source.path}/Daemoniq.Samples/Daemoniq.Samples.csproj">
+               <arg value="/property:Configuration=${configuration}" />              
+       </msbuild>       
+    </target>
+    
+    <target name="test" description="Running nunit tests">
+      <nunit2>
+        <formatter type="Xml" usefile="true" extension=".xml" outputdir="." />
+        <test assemblyname="${output.binary.path}/Daemoniq.Tests.dll" />
+      </nunit2>
+    </target>
+    
+    <target name="package" description="Packaging to zip file">
+        <mkdir dir="${package.path}" />
+        <zip zipfile="${package.path}/${binaries.package}">
+          <fileset basedir="${output.binary.path}">                            
+              <include name="*.dll" />
+              <include name="*.exe" />
+              <include name="*.xml" />
+              <include name="*.pdb" if="${configuration == 'Debug'}" />              
+          </fileset>                        
+        </zip>
+        <zip zipfile="${package.path}/${sources.package}">
+          <fileset basedir="${source.path}/..">
+              <include name="Daemoniq.sln" />
+              <include name="*.txt" />
+              <include name="src/**/*" />
+              <include name="build/${nant.directory}/*.txt" />
+              <include name="build/${nant.directory}/bin/**/*" />
+              <include name="build/nantcontrib-0.85/bin/**/*" />
+              <include name="build/nantcontrib-0.85/*.txt" />              
+              <include name="build/scripts/*" />
+              <include name="ext-bin/**/*" />
+              
+              <exclude name="**/*.gpState" />
+              <exclude name="**/*.DS_Store" />                           
+              <exclude name="**/*.ccexclude" />              
+              <exclude name="src/**/*.dll" />
+              <exclude name="src/**/*.pdb" />              
+              <exclude name="build/scripts/*.log" />
+              <exclude name="build/scripts/*.xml" />
+          </fileset>                        
+        </zip>
+    </target>
+    <target name="full-build" depends="clean, build, copy-dependencies, test, package" />
+</project>

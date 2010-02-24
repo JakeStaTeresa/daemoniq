@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C0241B29-AE6D-4A11-98D5-116022D1BF0C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Daemoniq</RootNamespace>
+    <AssemblyName>Daemoniq</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="Common.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ext-bin\Common.Logging\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ext-bin\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration\DaemoniqConfigurationSection.cs" />
+    <Compile Include="Configuration\RecoveryOptionsElement.cs" />
+    <Compile Include="Configuration\ServiceDependedOnElement.cs" />
+    <Compile Include="Configuration\ServiceDependedOnElementCollection.cs" />
+    <Compile Include="Configuration\ServiceElement.cs" />
+    <Compile Include="Configuration\ServiceElementCollection.cs" />
+    <Compile Include="Core\Cli\ArgumentInfo.cs" />
+    <Compile Include="Core\Cli\ArgumentType.cs" />
+    <Compile Include="Core\Cli\Configuration.cs" />
+    <Compile Include="Core\Cli\ContextInfo.cs" />
+    <Compile Include="Core\Cli\Parser.cs" />
+    <Compile Include="Core\Cli\ParseResult.cs" />
+    <Compile Include="Core\CommandLineArguments.cs" />
+    <Compile Include="Core\Commands\CommandFactory.cs" />
+    <Compile Include="Core\Commands\ConsoleCommand.cs" />
+    <Compile Include="Core\Commands\ICommand.cs" />
+    <Compile Include="Core\Commands\InstallCommand.cs" />
+    <Compile Include="Core\Commands\InstallerCommandBase.cs" />
+    <Compile Include="Core\Commands\RunCommand.cs" />
+    <Compile Include="Core\Commands\UninstallCommand.cs" />
+    <Compile Include="Configuration\CDataConfigurationElement.cs" />
+    <Compile Include="Configuration\CDataConfigurationPropertyAttribute.cs" />
+    <Compile Include="Configuration\ConfigurationElementCollection.cs" />
+    <Compile Include="Core\ServiceControlHelper.cs" />
+    <Compile Include="Core\WindowsServiceInstaller.cs">
+    </Compile>
+    <Compile Include="Framework\ServiceInfo.cs" />
+    <Compile Include="Core\ThrowHelper.cs" />
+    <Compile Include="Framework\AccountInfo.cs" />
+    <Compile Include="Core\WindowsServiceBase.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Framework\AccountType.cs" />
+    <Compile Include="Framework\DefaultConfigurer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Framework\IConfigurer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Framework\KnownServices.cs" />
+    <Compile Include="Framework\Configuration.cs" />
+    <Compile Include="Framework\IConfiguration.cs" />
+    <Compile Include="Framework\IServiceInstance.cs" />
+    <Compile Include="Framework\ServiceApplication.cs" />
+    <Compile Include="Framework\ConfigurationAction.cs" />
+    <Compile Include="Framework\ServiceRecoveryAction.cs" />
+    <Compile Include="Framework\ServiceRecoveryOptions.cs" />
+    <Compile Include="Framework\StartMode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Framework\ServiceInstanceBase.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
