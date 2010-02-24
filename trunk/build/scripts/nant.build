@@ -24,15 +24,25 @@
         </delete>
     </target>
 
-<!--
     <target name="copy-dependencies" description="Copying all external dependencies to binary.path">      
       <copy todir="${output.binary.path}">
-          <fileset basedir="${external.binary.path}">
-              <include name="nunit/*.*" />
+          <fileset basedir="${external.binary.path}/CommonServiceLocator">
+              <include name="Castle.*" />
+              <include name="CommonServiceLocator.WindsorAdapter.*" />
+          </fileset>
+      </copy>
+      <copy todir="${output.binary.path}">
+          <fileset basedir="${external.binary.path}/Common.Logging">
+              <include name="Common.Logging.Log4Net.*" />
+          </fileset>
+      </copy>
+      <copy todir="${output.binary.path}">
+          <fileset basedir="${external.binary.path}/Common.ServiceProvider">
+              <include name="Windsor.ServiceProvider.*" />
           </fileset>
       </copy>
     </target>    
--->
+
     <target name="build">
         <msbuild project="${source.path}/Daemoniq/Daemoniq.csproj">
               <arg value="/property:Configuration=${configuration}" />              
@@ -84,5 +94,5 @@
           </fileset>                        
         </zip>
     </target>
-    <target name="full-build" depends="clean, build, test, package" />
+    <target name="full-build" depends="clean, build, copy-dependencies, test, package" />
 </project>
